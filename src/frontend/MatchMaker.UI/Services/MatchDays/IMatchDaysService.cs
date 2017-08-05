@@ -3,17 +3,12 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace MatchMaker.UI.Services.ApiClient
+namespace MatchMaker.UI.Services.MatchDays
 {
-    public interface IApiClientService
+    public interface IMatchDaysService
     {
-        Task Register(string email, string password);
-
-        Task<string> Login(string email, string password);
-
         Task<MatchDayCompact> CreateNewMatchDay(List<int> participantIds, DateTime when);
 
         Task<Match> GetNewMatchDay(int matchDayId);
-
     }
 }
