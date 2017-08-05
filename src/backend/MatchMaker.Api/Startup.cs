@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.SqlClient;
 using System.Linq;
 using System.Threading.Tasks;
 using MatchMaker.Api.AppSettings;
+using MatchMaker.Api.Database;
+using MatchMaker.Api.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -28,7 +31,11 @@ namespace MatchMaker.Api
 
         public void ConfigureServices(IServiceCollection services)
         {
-            services.Configure<Auth0Settings>(this.Configuration.GetSection("Auth0"));
+            services.Configure<DatabaseSettings>(this.Configuration.GetSection("Database"));
+            services.Configure<AccountSettings>(this.Configuration.GetSection("Account"));
+
+            services.AddSingleton<IDbConnectionFactory, SqlDbConnectionFactory>();
+            services.AddSingleton<IJwtService, JwtService>();
             
             services.AddMvc();
         }
