@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Threading.Tasks;
 using MatchMaker.UI.Exceptions;
+using MatchMaker.UI.Services.Alert;
 using MatchMaker.UI.Services.Authentication;
+using MatchMaker.UI.Services.Navigation;
 using MatchMaker.UI.Views.Shell;
 using Xamarin.Forms;
 
@@ -9,7 +11,9 @@ namespace MatchMaker.UI.Views.Login
 {
     public class LoginViewModel : BaseViewModel
     {
-        public IAuthService AuthService => DependencyService.Get<IAuthService>();
+        private readonly IAuthService _authService;
+        private readonly INavigationService _navigationService;
+        private readonly IAlertService _alertService;
 
         private string _eMail;
         private string _password;
@@ -29,8 +33,11 @@ namespace MatchMaker.UI.Views.Login
         public Command LoginCommand { get; }
         public Command RegisterCommand { get; }
 
-        public LoginViewModel()
+        public LoginViewModel(IAuthService authService, INavigationService navigationService, IAlertService alertService)
         {
+            this._authService = authService;
+            this._navigationService = navigationService;
+            this._alertService = alertService;
 
             this.LoginCommand = new Command(async () => { await this.Login(); });
             this.RegisterCommand = new Command(async () => { await this.Register(); });
@@ -43,12 +50,11 @@ namespace MatchMaker.UI.Views.Login
         {
             try
             {
-
-                await this.AuthService.Register(this.EMail, this.Password);
+                await this._authService.Register(this.EMail, this.Password);
             }
-            catch (EmailAlreadyInUseException e)
+            catch (EmailAlreadyInUseException)
             {
-
+                await this._alertService.DisplayAlert("Invalid Sign-Up", "This email-address is already in use.");
             }
         }
 
@@ -56,18 +62,20 @@ namespace MatchMaker.UI.Views.Login
         {
             try
             {
-                await this.AuthService.Login(this.EMail, this.Password);
+                await this._authService.Login(this.EMail, this.Password);
             }
             catch (InvalidPasswordException)
             {
+                await this._alertService.DisplayAlert("Invalid Logindata", "Wrong password");
                 return;
             }
             catch (UserNotFoundException)
             {
+                await this._alertService.DisplayAlert("Invalid Logindata", "User was not found");
                 return;
             }
 
-            Application.Current.MainPage = new ShellView();
+            this._navigationService.NavigateToShell();
         }
     }
 }

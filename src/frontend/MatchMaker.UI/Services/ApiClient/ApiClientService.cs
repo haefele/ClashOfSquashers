@@ -29,7 +29,8 @@ namespace MatchMaker.UI.Services.ApiClient
         public async Task Register(string email, string password)
         {
             var json = JsonConvert.SerializeObject(new RegisterData { EmailAddress = email, Password = password });
-            var response = await this._client.PostAsync("accounts/register", new StringContent(json, Encoding.UTF8, "application/json"));
+            var request = new HttpRequestMessage(HttpMethod.Post, "accounts/register"){Content = new StringContent(json, Encoding.UTF8, "application/json") };
+            var response = await this.Send(request);
 
             switch (response.StatusCode)
             {
@@ -43,7 +44,8 @@ namespace MatchMaker.UI.Services.ApiClient
         public async Task<string> Login(string email, string password)
         {
             var json = JsonConvert.SerializeObject(new RegisterData { EmailAddress = email, Password = password });
-            var response = await this._client.PostAsync("accounts/login", new StringContent(json, Encoding.UTF8, "application/json"));
+            var request = new HttpRequestMessage(HttpMethod.Post, "accounts/login") { Content = new StringContent(json, Encoding.UTF8, "application/json") };
+            var response = await this.Send(request);
             
             switch (response.StatusCode)
             {
@@ -57,6 +59,18 @@ namespace MatchMaker.UI.Services.ApiClient
                     return content.Token;
                 default:
                     throw new Exception(response.StatusCode.ToString());
+            }
+        }
+
+        private async Task<HttpResponseMessage> Send(HttpRequestMessage request)
+        {
+            try
+            {
+                return await this._client.SendAsync(request);
+            }
+            catch (HttpRequestException e)
+            {
+                throw new NoConnectionException(e.Message, e.InnerException);
             }
         }
     }
