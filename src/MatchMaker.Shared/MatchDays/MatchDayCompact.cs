@@ -21,6 +21,7 @@ namespace MatchMaker.Shared.MatchDays
     {
         public int Id { get; set; }
         public int Number { get; set; }
+        public int MatchDayId { get; set; }
         public AccountCompact CreatedBy { get; set; }
         public AccountCompact Participant1 { get; set; }
         public AccountCompact Participant2 { get; set; }

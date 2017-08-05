@@ -18,7 +18,7 @@ using Newtonsoft.Json;
 
 namespace MatchMaker.Api.Controllers
 {
-    [Route("accounts")]
+    [Route("Accounts")]
     public class AccountsController : Controller
     {
         private readonly IDbConnectionFactory _dbConnectionFactory;
