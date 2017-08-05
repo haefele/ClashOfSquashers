@@ -15,7 +15,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MatchMaker.Api", "src\backe
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "backend", "backend", "{95E9AAAC-B0F3-450A-A1A7-B1362B58BAFB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MatchMaker.UI", "src\frontend\MatchMaker.UI\MatchMaker.UI.csproj", "{FFEB8D1E-777E-4066-A1D8-8AAEB1AA0928}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MatchMaker.UI", "src\frontend\MatchMaker.UI\MatchMaker.UI.csproj", "{FFEB8D1E-777E-4066-A1D8-8AAEB1AA0928}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MatchMaker.UI.Android", "src\frontend\MatchMaker.UI.Android\MatchMaker.UI.Android.csproj", "{2FFEF11C-3073-4941-AFC2-804D57AB9C9A}"
 EndProject
@@ -166,6 +166,7 @@ Global
 		{AABF9699-37DB-43E2-AE83-FBAA0FC44326}.Release|x64.ActiveCfg = Release|iPhone
 		{AABF9699-37DB-43E2-AE83-FBAA0FC44326}.Release|x86.ActiveCfg = Release|iPhone
 		{1E08D749-0D34-431B-A511-A870FD5978D1}.Debug|Any CPU.ActiveCfg = Debug|x86
+		{1E08D749-0D34-431B-A511-A870FD5978D1}.Debug|Any CPU.Deploy.0 = Debug|x86
 		{1E08D749-0D34-431B-A511-A870FD5978D1}.Debug|ARM.ActiveCfg = Debug|ARM
 		{1E08D749-0D34-431B-A511-A870FD5978D1}.Debug|ARM.Build.0 = Debug|ARM
 		{1E08D749-0D34-431B-A511-A870FD5978D1}.Debug|ARM.Deploy.0 = Debug|ARM

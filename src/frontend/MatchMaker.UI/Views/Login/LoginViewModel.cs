@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Threading.Tasks;
+using MatchMaker.UI.Exceptions;
 using MatchMaker.UI.Services.Authentication;
+using MatchMaker.UI.Views.Shell;
 using Xamarin.Forms;
 
 namespace MatchMaker.UI.Views.Login
@@ -11,7 +13,7 @@ namespace MatchMaker.UI.Views.Login
 
         private string _eMail;
         private string _password;
-        
+
         public string EMail
         {
             get { return this._eMail; }
@@ -39,12 +41,33 @@ namespace MatchMaker.UI.Views.Login
 
         private async Task Register()
         {
-            await this.AuthService.Register(this.EMail, this.Password);
+            try
+            {
+
+                await this.AuthService.Register(this.EMail, this.Password);
+            }
+            catch (EmailAlreadyInUseException e)
+            {
+
+            }
         }
 
         private async Task Login()
         {
-            await this.AuthService.Login(this.EMail, this.Password);
+            try
+            {
+                await this.AuthService.Login(this.EMail, this.Password);
+            }
+            catch (InvalidPasswordException)
+            {
+                return;
+            }
+            catch (UserNotFoundException)
+            {
+                return;
+            }
+
+            Application.Current.MainPage = new ShellView();
         }
     }
 }

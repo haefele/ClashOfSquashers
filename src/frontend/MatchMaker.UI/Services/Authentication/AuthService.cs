@@ -10,6 +10,8 @@ namespace MatchMaker.UI.Services.Authentication
     {
         public IApiClientService ApiClient => DependencyService.Get<IApiClientService>();
 
+        private string _token;
+
         public async Task Register(string email, string password)
         {
             await this.ApiClient.Register(email, password);
@@ -17,7 +19,7 @@ namespace MatchMaker.UI.Services.Authentication
 
         public async Task Login(string email, string password)
         {
-            await this.ApiClient.Login(email, password);
+            this._token = await this.ApiClient.Login(email, password);
         }
     }
 }

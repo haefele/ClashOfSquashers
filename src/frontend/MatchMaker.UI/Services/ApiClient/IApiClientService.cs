@@ -6,6 +6,6 @@ namespace MatchMaker.UI.Services.ApiClient
     {
         Task Register(string email, string password);
 
-        Task Login(string email, string password);
+        Task<string> Login(string email, string password);
     }
 }
