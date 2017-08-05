@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
+using MatchMaker.UI.Services.Alert;
+using MatchMaker.UI.Services.Authentication;
+using MatchMaker.UI.Services.Navigation;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 
@@ -18,7 +20,10 @@ namespace MatchMaker.UI.Views.Login
         {
             this.InitializeComponent();
             
-            this.BindingContext = new LoginViewModel();
+            this.BindingContext = new LoginViewModel(
+                DependencyService.Get<IAuthService>(), 
+                DependencyService.Get<INavigationService>(),
+                DependencyService.Get<IAlertService>());
         }
     }
 }

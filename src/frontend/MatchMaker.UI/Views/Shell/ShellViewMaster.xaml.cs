@@ -33,7 +33,7 @@ namespace MatchMaker.UI.Views.Shell
             {
                 MenuItems = new ObservableCollection<ShellViewMenuItem>(new[]
                 {
-                    new ShellViewMenuItem { Id = 0, Title = "Page 1", TargetType = typeof(MainView)}
+                    new ShellViewMenuItem { Id = 0, Title = "Main", TargetType = typeof(MainView)}
                 });
             }
             

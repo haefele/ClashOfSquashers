@@ -8,10 +8,12 @@
         <Image Source="testlogo.jpg"
                />
         <Entry Placeholder="User"
-               Text="{Binding EMail}"/>
+               Text="{Binding EMail}"
+               Keyboard="Email" />
         <Entry IsPassword="True"
                Placeholder="Password"
-               Text="{Binding Password}"/>
+               Text="{Binding Password}"
+               HorizontalOptions="FillAndExpand"/>
         <Button Text="Login"
                 Command="{Binding LoginCommand}"/>
         <Button Text="Sign up"
