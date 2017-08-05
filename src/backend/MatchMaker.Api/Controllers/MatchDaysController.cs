@@ -16,7 +16,7 @@ namespace MatchMaker.Api.Controllers
 
         public MatchDaysController(IDbConnectionFactory dbConnectionFactory)
         {
-            this._dbConnectionFactory = dbConnectionFactory;
+            this._dbConnectionFactory = dbConnectionFactory ?? throw new ArgumentNullException(nameof(dbConnectionFactory));
         }
 
         [HttpPost]
@@ -37,76 +37,5 @@ namespace MatchMaker.Api.Controllers
             }
         }
 
-        [HttpGet]
-        [Route("{matchDayId:int}/NextMatch")]
-        public async Task<IActionResult> GetNextMatch(int matchDayId, CancellationToken cancellationToken = default(CancellationToken))
-        {
-            if (matchDayId <= 0)
-                return this.BadRequest();
-
-            using (var connection = this._dbConnectionFactory.Create())
-            using (var transaction = connection.BeginTransaction())
-            {
-                var matches = await connection.GetMatchesFromMatchDay(matchDayId, transaction, cancellationToken);
-                var participants = await connection.GetParticipantsFromMatchDay(matchDayId, transaction, cancellationToken);
-
-                if (participants.Count == 0)
-                    return this.BadRequest();
-
-                var uniqueMatches = this.CreateUniqueMatches(participants);
-                foreach (var match in matches)
-                {
-                    var uniqueMatch = uniqueMatches.FirstOrDefault(f =>
-                        f.Participant1 == match.Item1 && f.Participant2 == match.Item2 ||
-                        f.Participant1 == match.Item2 && f.Participant1 == match.Item1);
-
-                    uniqueMatch.Count++;
-                }
-
-                var nextMatch = uniqueMatches.FirstOrDefault(f => f.Count == uniqueMatches.Select(d => d.Count).Min());
-                var accountCompacts = await connection.GetAccountCompacts(new List<int> {nextMatch.Participant1, nextMatch.Participant2}, transaction, cancellationToken);
-
-                var result = new Match
-                {
-                    Id = 0,
-                    Number = await connection.GetNextMatchNumberForMatchDay(matchDayId, transaction, cancellationToken),
-                    Participant1 = accountCompacts.First(f => f.Id == nextMatch.Participant1),
-                    Participant2 = accountCompacts.First(f => f.Id == nextMatch.Participant2),
-                    CreatedBy = null,
-                    Participant1Points = 0,
-                    Participant2Points = 0,
-                    StartTime = null,
-                    EndTime = null
-                };
-
-                return this.Ok(result);
-            }
-        }
-
-        private List<Matchup> CreateUniqueMatches(List<int> participants)
-        {
-            var result = new List<Matchup>();
-
-            for (int i = 0; i < participants.Count; i++)
-            {
-                for (int o = i + 1; o < participants.Count; o++)
-                {
-                    result.Add(new Matchup
-                    {
-                        Participant1 = participants[i],
-                        Participant2 = participants[o]
-                    });
-                }
-            }
-
-            return result;
-        }
-
-        private class Matchup
-        {
-            public int Participant1 { get; set; }
-            public int Participant2 { get; set; }
-            public int Count { get; set; }
-        }
     }
 }

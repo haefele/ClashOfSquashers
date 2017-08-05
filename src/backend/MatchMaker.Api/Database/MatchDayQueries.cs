@@ -62,7 +62,7 @@ namespace MatchMaker.Api.Database
                 .ToList();
 
             sql = @"SELECT COUNT(*)
-                    FROM dbo.Match M
+                    FROM dbo.Matches M
                     WHERE M.MatchDayId = @Id";
             def = new CommandDefinition(sql, parameters, cancellationToken:cancellationToken, transaction:transaction);
             result.MatchCount = await self.ExecuteScalarAsync<int>(def);
@@ -72,7 +72,7 @@ namespace MatchMaker.Api.Database
 
         public static async Task<List<Tuple<int, int>>> GetMatchesFromMatchDay(this IDbConnection self, int matchDayId, IDbTransaction transaction, CancellationToken cancellationToken = default(CancellationToken))
         {
-            var sql = "SELECT Participant1AccountId, Participant2AccountId FROM dbo.Match WHERE MatchDayId = @MatchDayId";
+            var sql = "SELECT Participant1AccountId, Participant2AccountId FROM dbo.Matches WHERE MatchDayId = @MatchDayId";
             var parameters = new
             {
                 MatchDayId = matchDayId
@@ -98,13 +98,35 @@ namespace MatchMaker.Api.Database
 
         public static async Task<int> GetNextMatchNumberForMatchDay(this IDbConnection self, int matchDayId, IDbTransaction transaction, CancellationToken cancellationToken = default(CancellationToken))
         {
-            var sql = "SELECT ISNULL(MAX(Number), 0) + 1 FROM dbo.Match WHERE MatchDayId = @MatchDayId";
+            var sql = "SELECT ISNULL(MAX(Number), 0) + 1 FROM dbo.Matches WHERE MatchDayId = @MatchDayId";
             var parameters = new
             {
                 MatchDayId = matchDayId,
             };
             var def = new CommandDefinition(sql, parameters, cancellationToken:cancellationToken, transaction:transaction);
             return await self.ExecuteScalarAsync<int>(def);
+        }
+
+        public static async Task<int> SaveMatch(this IDbConnection self, Match match, IDbTransaction transaction, CancellationToken cancellationToken = default(CancellationToken))
+        {
+            var sql = "INSERT INTO dbo.Matches(MatchDayId, Number, CreatedByAccountId, Participant1AccountId, Participant2AccountId, Participant1Points, Participant2Points, StartTime, EndTime) " +
+                      "VALUES (@MatchDayId, (SELECT ISNULL(MAX(Number), 0) + 1 FROM dbo.Matches WHERE MatchDayId = @MatchDayId), @CreatedByAccountId, @Participant1AccountId, @Participant2AccountId, @Participant1Points, @Participant2Points, @StartTime, @EndTime);" +
+                      "SELECT SCOPE_IDENTITY();";
+            var parameters = new
+            {
+                MatchDayId = match.MatchDayId,
+                CreatedByAccountId = match.CreatedBy.Id,
+                Participant1AccountId = match.Participant1.Id,
+                Participant2AccountId = match.Participant2.Id,
+                Participant1Points = match.Participant1Points,
+                Participant2Points = match.Participant2Points,
+                StartTime = match.StartTime,
+                EndTime = match.EndTime,
+            };
+            var def = new CommandDefinition(sql, parameters, cancellationToken:cancellationToken, transaction:transaction);
+            var matchId = await self.ExecuteScalarAsync<int>(def);
+
+            return matchId;
         }
     }
 }
