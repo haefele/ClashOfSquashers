@@ -3,6 +3,7 @@ using MatchMaker.UI.Services.Alert;
 using System.Threading.Tasks;
 using Xamarin.Forms;
 
+[assembly: Dependency(typeof(MatchMaker.UI.Services.Exception.ExceptionHandler))]
 namespace MatchMaker.UI.Services.Exception
 {
     public class ExceptionHandler : IExceptionHandler
