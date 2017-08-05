@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
+using MatchMaker.UI.Services.Navigation;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 
@@ -16,9 +16,9 @@ namespace MatchMaker.UI.Views.Main
 
 		public MainView ()
 		{
-			InitializeComponent ();
+			this.InitializeComponent();
 
-            this.BindingContext = new MainViewModel();
+            this.BindingContext = new MainViewModel(DependencyService.Get<INavigationService>());
 		}
 	}
 }

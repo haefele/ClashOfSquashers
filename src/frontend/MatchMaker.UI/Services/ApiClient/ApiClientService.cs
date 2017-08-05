@@ -65,7 +65,7 @@ namespace MatchMaker.UI.Services.ApiClient
                     var content = JsonConvert.DeserializeObject<LoginResult>(contentJson);
                     return content.Token;
                 default:
-                    throw new Exception(response.StatusCode.ToString());
+                    throw new System.Exception(response.StatusCode.ToString());
             }
         }
 
