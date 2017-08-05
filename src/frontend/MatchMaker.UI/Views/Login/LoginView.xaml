@@ -5,9 +5,10 @@
              Title="Login">
     <StackLayout HorizontalOptions="FillAndExpand"
                  Padding="5">
-        <Image Source="testlogo.jpg"/>
+        <Image Source="testlogo.jpg"
+               />
         <Entry Placeholder="User"
-               Text="{Binding UserName}"/>
+               Text="{Binding EMail}"/>
         <Entry IsPassword="True"
                Placeholder="Password"
                Text="{Binding Password}"/>
@@ -16,6 +17,6 @@
         <Button Text="Sign up"
                 BackgroundColor="Transparent"
                 BorderWidth="0"
-                Command="{Binding SignUpCommand}"/>
+                Command="{Binding RegisterCommand}"/>
     </StackLayout>
 </ContentPage>
