@@ -50,6 +50,9 @@ namespace MatchMaker.Api.Controllers
                 var matches = await connection.GetMatchesFromMatchDay(matchDayId, transaction, cancellationToken);
                 var participants = await connection.GetParticipantsFromMatchDay(matchDayId, transaction, cancellationToken);
 
+                if (participants.Count == 0)
+                    return this.BadRequest();
+
                 var uniqueMatches = this.CreateUniqueMatches(participants);
                 foreach (var match in matches)
                 {
@@ -60,7 +63,23 @@ namespace MatchMaker.Api.Controllers
                     uniqueMatch.Count++;
                 }
 
-                return this.Ok();
+                var nextMatch = uniqueMatches.FirstOrDefault(f => f.Count == uniqueMatches.Select(d => d.Count).Min());
+                var accountCompacts = await connection.GetAccountCompacts(new List<int> {nextMatch.Participant1, nextMatch.Participant2}, transaction, cancellationToken);
+
+                var result = new Match
+                {
+                    Id = 0,
+                    Number = await connection.GetNextMatchNumberForMatchDay(matchDayId, transaction, cancellationToken),
+                    Participant1 = accountCompacts.First(f => f.Id == nextMatch.Participant1),
+                    Participant2 = accountCompacts.First(f => f.Id == nextMatch.Participant2),
+                    CreatedBy = null,
+                    Participant1Points = 0,
+                    Participant2Points = 0,
+                    StartTime = null,
+                    EndTime = null
+                };
+
+                return this.Ok(result);
             }
         }
 
@@ -68,9 +87,9 @@ namespace MatchMaker.Api.Controllers
         {
             var result = new List<Matchup>();
 
-            for (int i = 0; i <= participants.Count; i++)
+            for (int i = 0; i < participants.Count; i++)
             {
-                for (int o = i; o <= participants.Count; o++)
+                for (int o = i + 1; o < participants.Count; o++)
                 {
                     result.Add(new Matchup
                     {

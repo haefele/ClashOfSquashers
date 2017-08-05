@@ -54,9 +54,9 @@ namespace MatchMaker.Api.Database
             var query2Result = await self.QueryAsync<dynamic>(def);
 
             result.Participants = query2Result
-                .Select(f => new MatchDayParticipant
+                .Select(f => new AccountCompact
                 {
-                    AccountId = f.Id,
+                    Id = f.Id,
                     EmailAddress = f.EmailAddress
                 })
                 .ToList();
@@ -72,7 +72,7 @@ namespace MatchMaker.Api.Database
 
         public static async Task<List<Tuple<int, int>>> GetMatchesFromMatchDay(this IDbConnection self, int matchDayId, IDbTransaction transaction, CancellationToken cancellationToken = default(CancellationToken))
         {
-            var sql = "SELECT Participant1AccountId, Participant2AccountId FROM dbo.MatchDayParticipants WHERE MatchDayId = @MatchDayId";
+            var sql = "SELECT Participant1AccountId, Participant2AccountId FROM dbo.Match WHERE MatchDayId = @MatchDayId";
             var parameters = new
             {
                 MatchDayId = matchDayId
@@ -94,6 +94,17 @@ namespace MatchMaker.Api.Database
             };
             var def = new CommandDefinition(sql, parameters, cancellationToken:cancellationToken, transaction:transaction);
             return (await self.QueryAsync<int>(def)).ToList();
+        }
+
+        public static async Task<int> GetNextMatchNumberForMatchDay(this IDbConnection self, int matchDayId, IDbTransaction transaction, CancellationToken cancellationToken = default(CancellationToken))
+        {
+            var sql = "SELECT ISNULL(MAX(Number), 0) + 1 FROM dbo.Match WHERE MatchDayId = @MatchDayId";
+            var parameters = new
+            {
+                MatchDayId = matchDayId,
+            };
+            var def = new CommandDefinition(sql, parameters, cancellationToken:cancellationToken, transaction:transaction);
+            return await self.ExecuteScalarAsync<int>(def);
         }
     }
 }

@@ -13,13 +13,26 @@ namespace MatchMaker.Shared.MatchDays
     {
         public int Id { get; set; }
         public DateTime When { get; set; }
-        public List<MatchDayParticipant> Participants { get; set; }
+        public List<AccountCompact> Participants { get; set; }
         public int MatchCount { get; set; }
     }
-
-    public class MatchDayParticipant
+    
+    public class Match
     {
-        public int AccountId { get; set; }
+        public int Id { get; set; }
+        public int Number { get; set; }
+        public AccountCompact CreatedBy { get; set; }
+        public AccountCompact Participant1 { get; set; }
+        public AccountCompact Participant2 { get; set; }
+        public int Participant1Points { get; set; }
+        public int Participant2Points { get; set; }
+        public DateTime? StartTime { get; set; }
+        public DateTime? EndTime { get; set; }
+    }
+
+    public class AccountCompact
+    {
+        public int Id { get; set; }
         public string EmailAddress { get; set; }
     }
 }
