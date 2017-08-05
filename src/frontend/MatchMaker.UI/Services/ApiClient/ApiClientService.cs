@@ -1,11 +1,12 @@
-﻿using System;
+﻿using MatchMaker.Shared.Accounts;
+using MatchMaker.Shared.Common;
+using MatchMaker.UI.Exceptions;
+using Newtonsoft.Json;
+using System;
 using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
-using MatchMaker.Shared.Accounts;
-using MatchMaker.UI.Exceptions;
-using Newtonsoft.Json;
 using Xamarin.Forms;
 
 
@@ -28,6 +29,9 @@ namespace MatchMaker.UI.Services.ApiClient
 
         public async Task Register(string email, string password)
         {
+            Guard.NotNullOrWhiteSpace(email, nameof(email));
+            Guard.NotNullOrWhiteSpace(password, nameof(password));
+
             var json = JsonConvert.SerializeObject(new RegisterData { EmailAddress = email, Password = password });
             var request = new HttpRequestMessage(HttpMethod.Post, "accounts/register"){Content = new StringContent(json, Encoding.UTF8, "application/json") };
             var response = await this.Send(request);
@@ -43,6 +47,9 @@ namespace MatchMaker.UI.Services.ApiClient
 
         public async Task<string> Login(string email, string password)
         {
+            Guard.NotNullOrWhiteSpace(email, nameof(email));
+            Guard.NotNullOrWhiteSpace(password, nameof(password));
+
             var json = JsonConvert.SerializeObject(new RegisterData { EmailAddress = email, Password = password });
             var request = new HttpRequestMessage(HttpMethod.Post, "accounts/login") { Content = new StringContent(json, Encoding.UTF8, "application/json") };
             var response = await this.Send(request);
