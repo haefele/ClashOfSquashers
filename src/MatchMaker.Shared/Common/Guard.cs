@@ -3,7 +3,7 @@ using System.Collections;
 using System.Diagnostics;
 using System.Reflection;
 
-namespace MatchMaker.Shared.Accounts
+namespace MatchMaker.Shared.Common
 {
     public static class Guard
     {
