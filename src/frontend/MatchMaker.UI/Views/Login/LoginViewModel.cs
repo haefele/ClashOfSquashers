@@ -1,5 +1,4 @@
 ﻿using System;
-using GalaSoft.MvvmLight.Command;
 using Xamarin.Forms;
 
 namespace MatchMaker.UI.Views.Login
