@@ -1,5 +1,4 @@
 ﻿using MatchMaker.UI.Helpers;
-using MatchMaker.UI.Models;
 using MatchMaker.UI.Services;
 using Xamarin.Forms;
 
