@@ -1,6 +1,6 @@
 ﻿using MatchMaker.UI.Models;
 
-namespace MatchMaker.UI.ViewModels
+namespace MatchMaker.UI.Views
 {
     public class ItemDetailViewModel : BaseViewModel
     {

@@ -1,7 +1,4 @@
-﻿
-using MatchMaker.UI.ViewModels;
-
-using Xamarin.Forms;
+﻿using Xamarin.Forms;
 
 namespace MatchMaker.UI.Views
 {

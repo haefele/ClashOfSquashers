@@ -1,14 +1,11 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Threading.Tasks;
-
 using MatchMaker.UI.Helpers;
 using MatchMaker.UI.Models;
-using MatchMaker.UI.Views;
-
 using Xamarin.Forms;
 
-namespace MatchMaker.UI.ViewModels
+namespace MatchMaker.UI.Views
 {
     public class ItemsViewModel : BaseViewModel
     {

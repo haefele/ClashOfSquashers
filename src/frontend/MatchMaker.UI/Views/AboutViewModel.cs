@@ -2,7 +2,7 @@
 using System.Windows.Input;
 using Xamarin.Forms;
 
-namespace MatchMaker.UI.ViewModels
+namespace MatchMaker.UI.Views
 {
     public class AboutViewModel : BaseViewModel
     {

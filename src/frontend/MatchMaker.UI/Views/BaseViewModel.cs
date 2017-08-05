@@ -1,10 +1,9 @@
 ﻿using MatchMaker.UI.Helpers;
 using MatchMaker.UI.Models;
 using MatchMaker.UI.Services;
-
 using Xamarin.Forms;
 
-namespace MatchMaker.UI.ViewModels
+namespace MatchMaker.UI.Views
 {
     public class BaseViewModel : ObservableObject
     {

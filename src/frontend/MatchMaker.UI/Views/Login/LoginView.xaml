@@ -1,0 +1,21 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="MatchMaker.UI.Views.Login.LoginView"
+             Title="Login">
+    <StackLayout HorizontalOptions="FillAndExpand"
+                 Padding="5">
+        <Image Source="testlogo.jpg"/>
+        <Entry Placeholder="User"
+               Text="{Binding UserName}"/>
+        <Entry IsPassword="True"
+               Placeholder="Password"
+               Text="{Binding Password}"/>
+        <Button Text="Login"
+                Command="{Binding LoginCommand}"/>
+        <Button Text="Sign up"
+                BackgroundColor="Transparent"
+                BorderWidth="0"
+                Command="{Binding SignUpCommand}"/>
+    </StackLayout>
+</ContentPage>

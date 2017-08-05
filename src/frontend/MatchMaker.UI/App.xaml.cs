@@ -1,5 +1,5 @@
 ﻿using MatchMaker.UI.Views;
-
+using MatchMaker.UI.Views.Login;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 
@@ -17,22 +17,24 @@ namespace MatchMaker.UI
 
         public static void SetMainPage()
         {
-            Current.MainPage = new TabbedPage
-            {
-                Children =
-                {
-                    new NavigationPage(new ItemsPage())
-                    {
-                        Title = "Browse",
-                        Icon = Device.OnPlatform("tab_feed.png",null,null)
-                    },
-                    new NavigationPage(new AboutPage())
-                    {
-                        Title = "About",
-                        Icon = Device.OnPlatform("tab_about.png",null,null)
-                    },
-                }
-            };
+            Current.MainPage = new LoginView();
+
+            //Current.MainPage = new TabbedPage
+            //{
+            //    Children =
+            //    {
+            //        new NavigationPage(new ItemsPage())
+            //        {
+            //            Title = "Browse",
+            //            Icon = Device.OnPlatform("tab_feed.png",null,null)
+            //        },
+            //        new NavigationPage(new AboutPage())
+            //        {
+            //            Title = "About",
+            //            Icon = Device.OnPlatform("tab_about.png",null,null)
+            //        },
+            //    }
+            //};
         }
     }
 }

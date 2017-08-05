@@ -1,8 +1,6 @@
 ﻿using System;
 
 using MatchMaker.UI.Models;
-using MatchMaker.UI.ViewModels;
-
 using Xamarin.Forms;
 
 namespace MatchMaker.UI.Views
