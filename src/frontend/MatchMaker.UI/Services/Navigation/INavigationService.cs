@@ -9,10 +9,6 @@ namespace MatchMaker.UI.Services.Navigation
         void NavigateToShell();
         void NavigateToNewMatchDay();
 
-        void SetShellDetailPage(ShellViewMenuItem item);
-        void ActivateShellItem(ShellViewMenuItem item);
-        void ReactivateShellItem(ShellViewMenuItem item, bool overrideExisting);
-
         Task ShowModalWindow(ContentPage page);
         Task PopModalWindow(bool animated = false);
         Task PopTopPage(bool animated = false);

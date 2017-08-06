@@ -5,6 +5,7 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using MatchMaker.UI.Services.Navigation;
+using MatchMaker.UI.Services.ShellNavigation;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 
@@ -19,7 +20,7 @@ namespace MatchMaker.UI.Views.Shell
         {
             this.InitializeComponent();
 
-            this.BindingContext = new ShellViewMasterViewModel(DependencyService.Get<INavigationService>());
+            this.BindingContext = new ShellViewMasterViewModel(DependencyService.Get<IShellNavigationService>());
         }
     }
 }

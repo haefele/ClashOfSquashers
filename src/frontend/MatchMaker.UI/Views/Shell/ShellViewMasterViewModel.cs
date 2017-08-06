@@ -2,13 +2,14 @@
 using System.Linq;
 using MatchMaker.UI.Helpers;
 using MatchMaker.UI.Services.Navigation;
+using MatchMaker.UI.Services.ShellNavigation;
 using MatchMaker.UI.Views.Main;
 
 namespace MatchMaker.UI.Views.Shell
 {
     public class ShellViewMasterViewModel : ObservableObject
     {
-        private readonly INavigationService _navigationService;
+        private readonly IShellNavigationService _shellNavigationService;
 
         private ObservableCollection<ShellViewMenuItem> _menuItems;
         private ShellViewMenuItem _selectedMenuItem;
@@ -27,13 +28,13 @@ namespace MatchMaker.UI.Views.Shell
                 this.SetProperty(ref this._selectedMenuItem, value);
 
                 if (value != null)
-                    this._navigationService.SetShellDetailPage(value);
+                    this._shellNavigationService.SetShellDetailPage(value);
             }
         }
 
-        public ShellViewMasterViewModel(INavigationService navigationService)
+        public ShellViewMasterViewModel(IShellNavigationService shellNavigationService)
         {
-            this._navigationService = navigationService;
+            this._shellNavigationService = shellNavigationService;
 
             // default pages
             this.MenuItems = new ObservableCollection<ShellViewMenuItem>
@@ -41,7 +42,7 @@ namespace MatchMaker.UI.Views.Shell
                 new ShellViewMenuItem {Page = new MainView(), TargetType = typeof(MainView), Title = "Overview"}
             };
 
-            this.SelectedMenuItem = Enumerable.First<ShellViewMenuItem>(this.MenuItems);
+            this.SelectedMenuItem = this.MenuItems.First<ShellViewMenuItem>();
         }
     }
 }

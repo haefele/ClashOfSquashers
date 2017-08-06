@@ -11,7 +11,12 @@ namespace MatchMaker.UI.Services.MatchDays
 {
     public class MatchDaysService : IMatchDaysService
     {
-        public IApiClientService ApiClient => DependencyService.Get<IApiClientService>();
+        public IApiClientService ApiClient;
+
+        public MatchDaysService()
+        {
+            this.ApiClient = DependencyService.Get<IApiClientService>();
+        }
 
         public async Task<MatchDayCompactDTO> CreateNewMatchDay(List<int> participantIds, DateTime when)
         {

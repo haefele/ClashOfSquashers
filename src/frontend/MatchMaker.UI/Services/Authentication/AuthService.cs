@@ -8,7 +8,12 @@ namespace MatchMaker.UI.Services.Authentication
 {
     public class AuthService : IAuthService
     {
-        public IApiClientService ApiClient => DependencyService.Get<IApiClientService>();
+        public IApiClientService ApiClient;
+
+        public AuthService()
+        {
+            this.ApiClient = DependencyService.Get<IApiClientService>();;
+        }
 
         private string _token;
 

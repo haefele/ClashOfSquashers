@@ -28,8 +28,15 @@ namespace MatchMaker.UI.UWP
         /// </summary>
         public App()
         {
+            Application.Current.UnhandledException += CurrentOnUnhandledException;
+
             this.InitializeComponent();
             this.Suspending += OnSuspending;
+        }
+
+        private void CurrentOnUnhandledException(object sender, UnhandledExceptionEventArgs unhandledExceptionEventArgs)
+        {
+            
         }
 
         /// <summary>
