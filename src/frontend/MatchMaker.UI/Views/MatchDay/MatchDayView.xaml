@@ -3,10 +3,31 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="MatchMaker.UI.Views.MatchDay.MatchDayView">
     <StackLayout>
-        <Label Text="Welcome to Xamarin Forms!" />
-        <Button Text="Create match"
+        <Label Text="matchday!" />
+        <Button Text="Next match"
                     VerticalOptions="End"
                     HorizontalOptions="CenterAndExpand"
                     Command="{Binding NextMatchCommand}"/>
+        <ListView x:Name="MenuItemsListView"
+                  SeparatorVisibility="None"
+                  HasUnevenRows="true"
+                  ItemsSource="{Binding Matches}">
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    <ViewCell>
+                        <StackLayout Padding="15,10" HorizontalOptions="FillAndExpand">
+                            <Label VerticalOptions="FillAndExpand" 
+                                   VerticalTextAlignment="Center" 
+                                   Text="{Binding Number}" 
+                                   FontSize="24"/>
+                            <Label VerticalOptions="FillAndExpand" 
+                                   VerticalTextAlignment="Center" 
+                                   Text="{Binding StartTime}" 
+                                   FontSize="24"/>
+                        </StackLayout>
+                    </ViewCell>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
     </StackLayout>
 </ContentPage>

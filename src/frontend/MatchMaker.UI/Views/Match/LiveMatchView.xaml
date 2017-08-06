@@ -3,18 +3,24 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="MatchMaker.UI.Views.Match.LiveMatchView">
     <Grid>
-        <Grid.RowDefintions>
+        <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
-        </Grid.RowDefintions>
+        </Grid.RowDefinitions>
         <StackLayout Grid.Row="0">
-            <Label Text="{Binding Match.Participant1.EmailAddress}" />
+            <Label Text="{Binding Match.Participant1.EmailAddress}"
+                   HorizontalOptions="Center"
+                   FontSize="30"/>
             <Label Text="vs"
                    HorizontalOptions="Center"/>
-            <Label Text="{Binding Match.Participant2.EmailAddress}" />
+            <Label Text="{Binding Match.Participant2.EmailAddress}"
+                   HorizontalOptions="Center" 
+                   FontSize="30"/>
         </StackLayout>
-        <Button Text="Add Results"
+        <Button Grid.Row="1"
+                Text="Add Results"
                 HorizontalOptions="CenterAndExpand"
-                Command="{Binding AddResultsCommand}"/>
+                Command="{Binding AddResultsCommand}"
+                Margin="10,10,10,10"/>
     </Grid>
 </ContentPage>

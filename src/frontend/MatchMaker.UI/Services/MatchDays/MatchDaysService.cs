@@ -27,5 +27,13 @@ namespace MatchMaker.UI.Services.MatchDays
 
             return await this.ApiClient.GetNextMatch(matchDayId);
         }
+
+        public async Task<Match> SaveMatch(int matchDayId, Match match)
+        {
+            Guard.NotLessOrEqual(matchDayId, 0, nameof(matchDayId));
+            Guard.NotNull(match, nameof(match));
+
+            return await this.ApiClient.SaveMatch(matchDayId, match);
+        }
     }
 }

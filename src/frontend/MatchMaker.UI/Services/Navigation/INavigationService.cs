@@ -1,4 +1,5 @@
 ﻿using System.Threading.Tasks;
+using MatchMaker.UI.Views.Shell;
 using Xamarin.Forms;
 
 namespace MatchMaker.UI.Services.Navigation
@@ -7,7 +8,10 @@ namespace MatchMaker.UI.Services.Navigation
     {
         void NavigateToShell();
         void NavigateToNewMatchDay();
-        void NavigateToNewMatch(int matchDayId);
+
+        void SetShellDetailPage(ShellViewMenuItem item);
+        void ActivateShellItem(ShellViewMenuItem item);
+        void ReactivateShellItem(ShellViewMenuItem item, bool overrideExisting);
 
         Task ShowModalWindow(ContentPage page);
         Task PopModalWindow(bool animated = false);

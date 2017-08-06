@@ -31,21 +31,21 @@ namespace MatchMaker.UI.Views.MatchDay.MatchDayConfigurator
         {
             var response = await this._matchDaysService.CreateNewMatchDay(new List<int> { 1, 2 }, DateTime.Now);
             
-            this.MatchCreated?.Invoke(this, new MatchCreatedEventArgs(response));
+            this.MatchCreated?.Invoke(this, new MatchDayCreatedEventArgs(response));
         }
 
-        public event EventHandler<MatchCreatedEventArgs> MatchCreated;
+        public event EventHandler<MatchDayCreatedEventArgs> MatchCreated;
 
         public EventHandler MatchCreationCanceled;
-    }
-
-    public class MatchCreatedEventArgs : EventArgs
-    {
-        public MatchDayCompact MatchDay { get; }
-
-        public MatchCreatedEventArgs(MatchDayCompact matchDay)
+        
+        public class MatchDayCreatedEventArgs : EventArgs
         {
-            this.MatchDay = matchDay;
+            public MatchDayCompact MatchDay { get; }
+
+            public MatchDayCreatedEventArgs(MatchDayCompact matchDay)
+            {
+                this.MatchDay = matchDay;
+            }
         }
     }
 }

@@ -3,21 +3,20 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="MatchMaker.UI.Views.MatchDay.MatchDayConfigurator.MatchDayConfiguratorView">
     <Grid>
-        <Grid.RowDefintions>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="Auto"/>
-        </Grid.RowDefintions>
+        <Grid.RowDefinitions>
+            <RowDefinition  Height="*"/>
+            <RowDefinition  Height="Auto"/>
+        </Grid.RowDefinitions>
         <Label Text="config options"
                Grid.Row="0"/>
-        <StackLayout Grid.Row="1">
-            <Button Text="Create match"
-                VerticalOptions="End"
+        <StackLayout Grid.Row="1"
+                     Padding="10">
+            <Button Text="Create matchday"
                 HorizontalOptions="CenterAndExpand"
                 Command="{Binding CreateCommand}"/>
             <Button Text="Cancel"
                 BackgroundColor="Transparent"
                 BorderWidth="0"
-                VerticalOptions="End"
                 HorizontalOptions="CenterAndExpand"
                 Command="{Binding CancelCommand}"/>
         </StackLayout>

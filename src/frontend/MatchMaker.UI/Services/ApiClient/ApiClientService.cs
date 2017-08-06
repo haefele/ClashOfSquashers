@@ -5,6 +5,7 @@ using MatchMaker.UI.Exceptions;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Text;
@@ -18,9 +19,13 @@ namespace MatchMaker.UI.Services.ApiClient
     public class ApiClientService : IApiClientService
     {
         private readonly HttpClient _client;
+        private bool UseMockData => true;
 
         public ApiClientService()
         {
+            if (this.UseMockData)
+                return;
+
             this._client = new HttpClient
             {
                 MaxResponseContentBufferSize = 256000,
@@ -33,6 +38,9 @@ namespace MatchMaker.UI.Services.ApiClient
         {
             Guard.NotNullOrWhiteSpace(email, nameof(email));
             Guard.NotNullOrWhiteSpace(password, nameof(password));
+
+            if (this.UseMockData)
+                return;
 
             var json = JsonConvert.SerializeObject(new RegisterData { EmailAddress = email, Password = password });
             var request = new HttpRequestMessage(HttpMethod.Post, "accounts/register") { Content = new StringContent(json, Encoding.UTF8, "application/json") };
@@ -51,6 +59,9 @@ namespace MatchMaker.UI.Services.ApiClient
         {
             Guard.NotNullOrWhiteSpace(email, nameof(email));
             Guard.NotNullOrWhiteSpace(password, nameof(password));
+
+            if (this.UseMockData)
+                return "this is irrelephant";
 
             var json = JsonConvert.SerializeObject(new RegisterData { EmailAddress = email, Password = password });
             var request = new HttpRequestMessage(HttpMethod.Post, "accounts/login") { Content = new StringContent(json, Encoding.UTF8, "application/json") };
@@ -76,6 +87,15 @@ namespace MatchMaker.UI.Services.ApiClient
             Guard.NotNullOrEmpty(participantIds, nameof(participantIds));
             Guard.NotInvalidDateTime(when, nameof(when));
 
+            if (this.UseMockData)
+                return new MatchDayCompact
+                {
+                    Id = 1,
+                    MatchCount = 10,
+                    Participants = new List<AccountCompact>(participantIds.Select(f => new AccountCompact { Id = f, EmailAddress = f + "lul@lulz.com" })),
+                    When = DateTime.Now
+                };
+
             var json = JsonConvert.SerializeObject(new CreateMatchDayData { ParticipantIds = participantIds, When = when });
             var request = new HttpRequestMessage(HttpMethod.Post, "matchdays") { Content = new StringContent(json, Encoding.UTF8, "application/json") };
             var response = await this.Send(request);
@@ -97,6 +117,17 @@ namespace MatchMaker.UI.Services.ApiClient
         {
             Guard.NotLessOrEqual(matchDayId, 0, nameof(matchDayId));
 
+            if (this.UseMockData)
+                return new Match
+                {
+                    MatchDayId = matchDayId,
+                    Id = 1,
+                    CreatedBy = new AccountCompact { Id = 1, EmailAddress = "lel@lel.com"},
+                    Participant1 = new AccountCompact { Id = 2, EmailAddress = "rofl@lel.com" },
+                    Participant2 = new AccountCompact { Id = 3, EmailAddress = "lulz@lel.com" },
+                    StartTime = DateTime.Now
+                    
+                };
 
             var json = JsonConvert.SerializeObject(matchDayId);
             var request = new HttpRequestMessage(HttpMethod.Post, $"{matchDayId}/nextmatch") { Content = new StringContent(json, Encoding.UTF8, "application/json") };
@@ -113,6 +144,17 @@ namespace MatchMaker.UI.Services.ApiClient
                 default:
                     throw new System.Exception(response.StatusCode.ToString());
             }
+        }
+
+        public async Task<Match> SaveMatch(int matchDayId, Match match)
+        {
+            if (this.UseMockData)
+            {
+                match.EndTime = DateTime.Now;
+                return match;
+            }
+
+            throw new NotImplementedException();
         }
 
         private async Task<HttpResponseMessage> Send(HttpRequestMessage request)

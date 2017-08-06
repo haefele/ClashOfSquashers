@@ -1,4 +1,6 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Linq;
+using System.Threading.Tasks;
 using MatchMaker.UI.Views.Match;
 using MatchMaker.UI.Views.MatchDay;
 using MatchMaker.UI.Views.Shell;
@@ -18,16 +20,69 @@ namespace MatchMaker.UI.Services.Navigation
 
         public void NavigateToNewMatchDay()
         {
-            this._shell.ActivateItem(new ShellViewMenuItem
+            this.ActivateShellItem(new ShellViewMenuItem
             {
+                Page = new MatchDayView(),
                 TargetType = typeof(MatchDayView),
                 Title = "Current Matchday"
-            }, true);
+            });
         }
 
-        public void NavigateToNewMatch(int matchDayId)
+        public void SetShellDetailPage(ShellViewMenuItem item)
         {
-            Application.Current.MainPage = new LiveMatchView(matchDayId);
+            if(this._shell == null)
+                return;
+
+            item.Page.Title = item.Title;
+            this._shell.Detail = item.Page;
+            this._shell.IsPresented = false;
+            
+        }
+
+        public void ActivateShellItem(ShellViewMenuItem item)
+        {
+            var masterPage = this._shell?.Master as ShellViewMaster;
+
+            if(masterPage == null)
+                return;
+
+            if (masterPage.ViewModel.MenuItems.Contains(item) == false)
+            {
+                masterPage.ViewModel.MenuItems.Add(item);
+            }
+
+            var page = (Page)Activator.CreateInstance(item.TargetType);
+            page.Title = item.Title;
+        }
+        
+        public void ReactivateShellItem(ShellViewMenuItem item, bool overrideExisting)
+        {
+
+            try
+            {
+                var masterPage = this._shell?.Master as ShellViewMaster;
+
+                if (masterPage == null)
+                    return;
+
+                if (overrideExisting && masterPage.ViewModel.MenuItems.Any(f => f.TargetType == item.TargetType))
+                {
+                    // replace
+                    masterPage.ViewModel.MenuItems.Remove(masterPage.ViewModel.MenuItems.First(f => f.TargetType == item.TargetType));
+                    masterPage.ViewModel.MenuItems.Add(item);
+                    masterPage.ViewModel.SelectedMenuItem = item;
+                }
+                else if (overrideExisting == false && masterPage.ViewModel.MenuItems.Any(f => f.TargetType == item.TargetType))
+                {
+                    // reactivate
+                    masterPage.ViewModel.SelectedMenuItem = masterPage.ViewModel.MenuItems.FirstOrDefault(f => f.TargetType == item.TargetType);
+                }
+            }
+            catch (System.Exception e)
+            {
+                
+                throw;
+            }
         }
 
         public async Task ShowModalWindow(ContentPage page)

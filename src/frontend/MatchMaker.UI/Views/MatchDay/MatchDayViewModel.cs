@@ -1,10 +1,13 @@
 ﻿using System;
+using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 using MatchMaker.Shared.MatchDays;
 using MatchMaker.UI.Common;
 using MatchMaker.UI.Services.MatchDays;
 using MatchMaker.UI.Services.Navigation;
+using MatchMaker.UI.Views.Match;
 using MatchMaker.UI.Views.MatchDay.MatchDayConfigurator;
+using MatchMaker.UI.Views.Shell;
 using Xamarin.Forms;
 
 namespace MatchMaker.UI.Views.MatchDay
@@ -15,7 +18,9 @@ namespace MatchMaker.UI.Views.MatchDay
         private readonly IMatchDaysService _matchDaysService;
 
         private bool _isNew;
+
         private MatchDayCompact _matchDay;
+        private ObservableCollection<Shared.MatchDays.Match> _matches;
 
         public bool IsNew
         {
@@ -33,6 +38,12 @@ namespace MatchMaker.UI.Views.MatchDay
             }
         }
 
+        public ObservableCollection<Shared.MatchDays.Match> Matches
+        {
+            get { return this._matches; }
+            set { this.SetProperty(ref this._matches, value); }
+        }
+
         public AsyncCommand NextMatchCommand { get; }
 
         public MatchDayViewModel(INavigationService navigationService, IMatchDaysService matchDaysService)
@@ -42,6 +53,9 @@ namespace MatchMaker.UI.Views.MatchDay
 
             this.NextMatchCommand = new AsyncCommand(_ => this.NextMatch(), CanNextMatch);
 
+            this.Matches = new ObservableCollection<Shared.MatchDays.Match>();
+
+            this.Title = "Current Matchday";
             this.IsNew = true;
         }
 
@@ -55,7 +69,20 @@ namespace MatchMaker.UI.Views.MatchDay
 
         private async Task NextMatch()
         {
-            this._navigationService.NavigateToNewMatch(this.MatchDay.Id);
+            var newMatchView = new LiveMatchView(this.MatchDay.Id);
+
+            newMatchView.ViewModel.MatchCreated += async (sender, args) =>
+            {
+                this.Matches.Add(args.Match);
+
+                await this._navigationService.PopModalWindow();
+            };
+            newMatchView.ViewModel.MatchCreationCanceled += async (sender, args) =>
+            {
+                await this._navigationService.PopModalWindow();
+            };
+
+            await this._navigationService.ShowModalWindow(newMatchView);
         }
 
         public async Task OnActivate()
@@ -73,6 +100,7 @@ namespace MatchMaker.UI.Views.MatchDay
                 configView.ViewModel.MatchCreationCanceled += async (sender, args) =>
                 {
                     await this._navigationService.PopModalWindow();
+                    this._navigationService.NavigateToShell();
                 };
 
                 await this._navigationService.ShowModalWindow(configView);
@@ -83,5 +111,7 @@ namespace MatchMaker.UI.Views.MatchDay
                 
             }
         }
+
+        public Type Type => null;
     }
 }
