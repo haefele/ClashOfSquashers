@@ -21,11 +21,11 @@ namespace MatchMaker.UI.Services.MatchDays
             return await this.ApiClient.CreateNewMatchDay(participantIds, when);
         }
 
-        public async Task<Match> GetNewMatchDay(int matchDayId)
+        public async Task<Match> GetNextMatch(int matchDayId)
         {
             Guard.NotLessOrEqual(matchDayId, 0, nameof(matchDayId));
 
-            return await this.ApiClient.GetNewMatchDay(matchDayId);
+            return await this.ApiClient.GetNextMatch(matchDayId);
         }
     }
 }

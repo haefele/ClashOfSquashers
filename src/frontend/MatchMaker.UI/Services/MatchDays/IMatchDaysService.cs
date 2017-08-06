@@ -9,6 +9,6 @@ namespace MatchMaker.UI.Services.MatchDays
     {
         Task<MatchDayCompact> CreateNewMatchDay(List<int> participantIds, DateTime when);
 
-        Task<Match> GetNewMatchDay(int matchDayId);
+        Task<Match> GetNextMatch(int matchDayId);
     }
 }

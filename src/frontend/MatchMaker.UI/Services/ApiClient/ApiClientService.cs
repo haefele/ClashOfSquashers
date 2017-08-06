@@ -93,7 +93,7 @@ namespace MatchMaker.UI.Services.ApiClient
             }
         }
 
-        public async Task<Match> GetNewMatchDay(int matchDayId)
+        public async Task<Match> GetNextMatch(int matchDayId)
         {
             Guard.NotLessOrEqual(matchDayId, 0, nameof(matchDayId));
 

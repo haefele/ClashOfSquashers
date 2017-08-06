@@ -13,7 +13,7 @@ namespace MatchMaker.UI.Services.ApiClient
 
         Task<MatchDayCompact> CreateNewMatchDay(List<int> participantIds, DateTime when);
 
-        Task<Match> GetNewMatchDay(int matchDayId);
+        Task<Match> GetNextMatch(int matchDayId);
 
     }
 }
