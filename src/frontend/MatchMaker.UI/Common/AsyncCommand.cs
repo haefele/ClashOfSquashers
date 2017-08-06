@@ -21,7 +21,16 @@ namespace MatchMaker.UI.Common
         public AsyncCommand(Func<object, Task> func, Func<object, bool> canExecute)
         {
             this._func = func;
-            this._canExecute = canExecute;
+
+            if (canExecute == null)
+                this._canExecute = o => true;
+            else
+                this._canExecute = canExecute;
+        }
+
+        public AsyncCommand(Func<object, Task> func)
+            : this(func, null)
+        {
         }
 
         public bool CanExecute(object parameter)

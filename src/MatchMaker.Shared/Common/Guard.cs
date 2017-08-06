@@ -42,5 +42,23 @@ namespace MatchMaker.Shared.Common
             if (Enum.IsDefined(argument.GetType(), argument) == false)
                 throw new ArgumentException("Unknown enum value.", argumentName);
         }
+
+        [DebuggerStepThrough]
+        public static void NotLessOrEqual(int argument, int value, string argumentName)
+        {
+            NotNull(argument, argumentName);
+
+            if (argument <= value)
+                throw new ArgumentException("Is less or equal.", argumentName);
+        }
+
+        [DebuggerStepThrough]
+        public static void NotInvalidDateTime(DateTime? argument, string argumentName)
+        {
+            NotNull(argument, argumentName);
+
+            if (argument <= new DateTime(1900, 1, 1))
+                throw new ArgumentException("Value is before 1900.", argumentName);
+        }
     }
 }

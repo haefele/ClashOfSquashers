@@ -1,5 +1,4 @@
 ﻿using MatchMaker.UI.Helpers;
-using MatchMaker.UI.Models;
 using MatchMaker.UI.Services;
 using Xamarin.Forms;
 
@@ -7,28 +6,19 @@ namespace MatchMaker.UI.Views
 {
     public class BaseViewModel : ObservableObject
     {
-        /// <summary>
-        /// Get the azure service instance
-        /// </summary>
-        public IDataStore<Item> DataStore => DependencyService.Get<IDataStore<Item>>();
+        private bool _isBusy;
+        private string _title;
 
-        bool isBusy = false;
         public bool IsBusy
         {
-            get { return isBusy; }
-            set { SetProperty(ref isBusy, value); }
+            get { return this._isBusy; }
+            set { this.SetProperty(ref this._isBusy, value); }
         }
-        /// <summary>
-        /// Private backing field to hold the title
-        /// </summary>
-        string title = string.Empty;
-        /// <summary>
-        /// Public property to set and get the title of the item
-        /// </summary>
+
         public string Title
         {
-            get { return title; }
-            set { SetProperty(ref title, value); }
+            get { return this._title; }
+            set { this.SetProperty(ref this._title, value); }
         }
     }
 }
