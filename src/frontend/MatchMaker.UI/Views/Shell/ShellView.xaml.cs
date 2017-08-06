@@ -14,8 +14,8 @@ namespace MatchMaker.UI.Views.Shell
     {
         public ShellView()
         {
-            InitializeComponent();
-            MasterPage.ListView.ItemSelected += ListView_ItemSelected;
+            this.InitializeComponent();
+            this.MasterPage.ListView.ItemSelected += ListView_ItemSelected;
         }
 
         private void ListView_ItemSelected(object sender, SelectedItemChangedEventArgs e)
@@ -24,13 +24,21 @@ namespace MatchMaker.UI.Views.Shell
             if (item == null)
                 return;
 
+           this.ActivateItem(item);
+        }
+
+        public void ActivateItem(ShellViewMenuItem item)
+        {
+            if(this.MasterPage.ViewModel.MenuItems.Contains(item) == false)
+                this.MasterPage.ViewModel.MenuItems.Add(item);
+
             var page = (Page)Activator.CreateInstance(item.TargetType);
             page.Title = item.Title;
 
-            Detail = new NavigationPage(page);
-            IsPresented = false;
+            this.Detail = new NavigationPage(page);
+            this.IsPresented = false;
 
-            MasterPage.ListView.SelectedItem = null;
+            this.MasterPage.ListView.SelectedItem = null;
         }
     }
 }

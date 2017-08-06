@@ -95,6 +95,24 @@ namespace MatchMaker.Api.Controllers
             }
         }
 
+        [HttpPut]
+        [Route("{matchDayId:int}/Matches/{matchId:int}")]
+        public async Task<IActionResult> UpdateMatch(int matchDayId, int matchId, [FromBody] Match match, CancellationToken cancellationToken = default(CancellationToken))
+        {
+            using (var connection = this._dbConnectionFactory.Create())
+            using (var transaction = connection.BeginTransaction())
+            {
+                match.Id = matchId;
+                match.MatchDayId = matchDayId;
+
+                await connection.UpdateMatch(match, transaction, cancellationToken);
+
+                transaction.Commit();
+
+                return this.Ok();
+            }
+        }
+
         #region Private Methods
         private List<Matchup> CreateUniqueMatches(List<int> participants)
         {
