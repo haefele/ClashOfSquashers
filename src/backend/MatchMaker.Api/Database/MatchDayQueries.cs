@@ -128,5 +128,25 @@ namespace MatchMaker.Api.Database
 
             return matchId;
         }
+
+        public static async Task UpdateMatch(this IDbConnection self, Match match, IDbTransaction transaction, CancellationToken cancellationToken = default(CancellationToken))
+        {
+            var sql = "UPDATE dbo.Matches SET " +
+                      "StartTime = @StartTime, " +
+                      "EndTime = @EndTime, " +
+                      "Participant1Points = @Participant1Points, " +
+                      "Participant2Points = @Participant2Points " +
+                      "WHERE Id = @MatchId";
+            var parameters = new
+            {
+                StartTime = match.StartTime,
+                EndTime = match.EndTime,
+                Participant1Points = match.Participant1Points,
+                Participant2Points = match.Participant2Points,
+                MatchId = match.Id
+            };
+            var def = new CommandDefinition(sql, parameters, cancellationToken:cancellationToken, transaction:transaction);
+            await self.ExecuteAsync(def);
+        }
     }
 }
