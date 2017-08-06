@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using MatchMaker.UI.Services.MatchDays;
 using MatchMaker.UI.Services.Navigation;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
@@ -17,12 +18,9 @@ namespace MatchMaker.UI.Views.MatchDay.MatchDayConfigurator
 		public MatchDayConfiguratorView ()
 		{
 			this.InitializeComponent();
-            this.BindingContext = new MatchDayConfiguratorViewModel(DependencyService.Get<INavigationService>());
+            this.BindingContext = new MatchDayConfiguratorViewModel(
+                DependencyService.Get<INavigationService>(), 
+                DependencyService.Get<IMatchDaysService>());
 		}
-        
-	    private async void BackButtonOnClicked(object sender, EventArgs eventArgs)
-	    {
-	        await Navigation.PopModalAsync();
-	    }
     }
 }

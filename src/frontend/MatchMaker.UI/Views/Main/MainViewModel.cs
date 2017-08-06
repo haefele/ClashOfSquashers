@@ -18,7 +18,7 @@ namespace MatchMaker.UI.Views.Main
 
         private async Task NewMatchday()
         {
-            this._navigationService.NavigateToNewMatch();
+            this._navigationService.NavigateToNewMatchDay();
         }
     }
 }
