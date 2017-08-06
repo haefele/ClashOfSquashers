@@ -19,8 +19,8 @@ namespace MatchMaker.UI.Views.MatchDay
 
         private bool _isNew;
 
-        private MatchDayCompact _matchDay;
-        private ObservableCollection<Shared.MatchDays.Match> _matches;
+        private MatchDayCompactDTO _matchDay;
+        private ObservableCollection<MatchDTO> _matches;
 
         public bool IsNew
         {
@@ -28,7 +28,7 @@ namespace MatchMaker.UI.Views.MatchDay
             set { this.SetProperty(ref this._isNew, value); }
         }
 
-        public MatchDayCompact MatchDay
+        public MatchDayCompactDTO MatchDay
         {
             get { return this._matchDay; }
             set
@@ -38,7 +38,7 @@ namespace MatchMaker.UI.Views.MatchDay
             }
         }
 
-        public ObservableCollection<Shared.MatchDays.Match> Matches
+        public ObservableCollection<MatchDTO> Matches
         {
             get { return this._matches; }
             set { this.SetProperty(ref this._matches, value); }
@@ -53,7 +53,7 @@ namespace MatchMaker.UI.Views.MatchDay
 
             this.NextMatchCommand = new AsyncCommand(_ => this.NextMatch(), CanNextMatch);
 
-            this.Matches = new ObservableCollection<Shared.MatchDays.Match>();
+            this.Matches = new ObservableCollection<MatchDTO>();
 
             this.Title = "Current Matchday";
             this.IsNew = true;

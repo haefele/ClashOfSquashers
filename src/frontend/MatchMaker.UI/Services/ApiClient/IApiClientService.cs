@@ -15,6 +15,6 @@ namespace MatchMaker.UI.Services.ApiClient
 
         Task<MatchDTO> GetNextMatch(int matchDayId);
 
-        Task<Match> SaveMatch(int matchDayId, Match match);
+        Task<MatchDTO> SaveMatch(int matchDayId, MatchDTO match);
     }
 }

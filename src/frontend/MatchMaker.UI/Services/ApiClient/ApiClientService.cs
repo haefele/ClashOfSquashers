@@ -88,11 +88,11 @@ namespace MatchMaker.UI.Services.ApiClient
             Guard.NotInvalidDateTime(when, nameof(when));
 
             if (this.UseMockData)
-                return new MatchDayCompact
+                return new MatchDayCompactDTO
                 {
                     Id = 1,
                     MatchCount = 10,
-                    Participants = new List<AccountCompact>(participantIds.Select(f => new AccountCompact { Id = f, EmailAddress = f + "lul@lulz.com" })),
+                    Participants = new List<AccountCompactDTO>(participantIds.Select(f => new AccountCompactDTO { Id = f, EmailAddress = f + "lul@lulz.com" })),
                     When = DateTime.Now
                 };
 
@@ -118,13 +118,13 @@ namespace MatchMaker.UI.Services.ApiClient
             Guard.NotLessOrEqual(matchDayId, 0, nameof(matchDayId));
 
             if (this.UseMockData)
-                return new Match
+                return new MatchDTO
                 {
                     MatchDayId = matchDayId,
                     Id = 1,
-                    CreatedBy = new AccountCompact { Id = 1, EmailAddress = "lel@lel.com"},
-                    Participant1 = new AccountCompact { Id = 2, EmailAddress = "rofl@lel.com" },
-                    Participant2 = new AccountCompact { Id = 3, EmailAddress = "lulz@lel.com" },
+                    CreatedBy = new AccountCompactDTO { Id = 1, EmailAddress = "lel@lel.com"},
+                    Participant1 = new AccountCompactDTO { Id = 2, EmailAddress = "rofl@lel.com" },
+                    Participant2 = new AccountCompactDTO { Id = 3, EmailAddress = "lulz@lel.com" },
                     StartTime = DateTime.Now
                     
                 };
@@ -145,8 +145,8 @@ namespace MatchMaker.UI.Services.ApiClient
                     throw new System.Exception(response.StatusCode.ToString());
             }
         }
-
-        public async Task<Match> SaveMatch(int matchDayId, Match match)
+        
+        public async Task<MatchDTO> SaveMatch(int matchDayId, MatchDTO match)
         {
             if (this.UseMockData)
             {

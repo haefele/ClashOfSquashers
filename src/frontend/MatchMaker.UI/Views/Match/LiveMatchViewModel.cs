@@ -11,9 +11,9 @@ namespace MatchMaker.UI.Views.Match
     {
         private readonly int _matchDayId;
         private readonly IMatchDaysService _matchDaysService;
-        private Shared.MatchDays.Match _match;
+        private MatchDTO _match;
 
-        public Shared.MatchDays.Match Match
+        public MatchDTO Match
         {
             get { return this._match; }
             set { this.SetProperty(ref this._match, value); }
@@ -49,9 +49,9 @@ namespace MatchMaker.UI.Views.Match
 
     public class MatchResultsAddedEventArgs : EventArgs
     {
-        public Shared.MatchDays.Match Match { get; }
+        public MatchDTO Match { get; }
         
-        public MatchResultsAddedEventArgs(Shared.MatchDays.Match match)
+        public MatchResultsAddedEventArgs(MatchDTO match)
         {
             this.Match = match;
         }

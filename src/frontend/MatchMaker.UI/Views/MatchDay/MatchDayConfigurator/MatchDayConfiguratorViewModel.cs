@@ -40,9 +40,9 @@ namespace MatchMaker.UI.Views.MatchDay.MatchDayConfigurator
         
         public class MatchDayCreatedEventArgs : EventArgs
         {
-            public MatchDayCompact MatchDay { get; }
+            public MatchDayCompactDTO MatchDay { get; }
 
-            public MatchDayCreatedEventArgs(MatchDayCompact matchDay)
+            public MatchDayCreatedEventArgs(MatchDayCompactDTO matchDay)
             {
                 this.MatchDay = matchDay;
             }
