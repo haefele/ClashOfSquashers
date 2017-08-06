@@ -1,0 +1,20 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="MatchMaker.UI.Views.Match.LiveMatchView">
+    <Grid>
+        <Grid.RowDefintions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefintions>
+        <StackLayout Grid.Row="0">
+            <Label Text="{Binding Match.Participant1.EmailAddress}" />
+            <Label Text="vs"
+                   HorizontalOptions="Center"/>
+            <Label Text="{Binding Match.Participant2.EmailAddress}" />
+        </StackLayout>
+        <Button Text="Add Results"
+                HorizontalOptions="CenterAndExpand"
+                Command="{Binding AddResultsCommand}"/>
+    </Grid>
+</ContentPage>

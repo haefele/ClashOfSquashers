@@ -24,13 +24,20 @@ namespace MatchMaker.UI.Views.Shell
             if (item == null)
                 return;
 
-           this.ActivateItem(item);
+           this.ActivateItem(item, false);
         }
 
-        public void ActivateItem(ShellViewMenuItem item)
+        public void ActivateItem(ShellViewMenuItem item, bool overrideExisting)
         {
-            if(this.MasterPage.ViewModel.MenuItems.Contains(item) == false)
+            if (overrideExisting && this.MasterPage.ViewModel.MenuItems.Any(f => f.TargetType == item.TargetType))
+            {
+                this.MasterPage.ViewModel.MenuItems.Remove(this.MasterPage.ViewModel.MenuItems.First(f => f.TargetType == item.TargetType));
                 this.MasterPage.ViewModel.MenuItems.Add(item);
+            }
+            else if(this.MasterPage.ViewModel.MenuItems.Contains(item) == false)
+            {
+                this.MasterPage.ViewModel.MenuItems.Add(item);
+            }
 
             var page = (Page)Activator.CreateInstance(item.TargetType);
             page.Title = item.Title;

@@ -60,20 +60,20 @@ namespace MatchMaker.UI.Views.Login
 
         private async Task Login()
         {
-            //try
-            //{
-            //    await this._authService.Login(this.EMail, this.Password);
-            //}
-            //catch (InvalidPasswordException)
-            //{
-            //    await this._alertService.DisplayAlert("Invalid Logindata", "Wrong password");
-            //    return;
-            //}
-            //catch (UserNotFoundException)
-            //{
-            //    await this._alertService.DisplayAlert("Invalid Logindata", "User was not found");
-            //    return;
-            //}
+            try
+            {
+                await this._authService.Login(this.EMail, this.Password);
+            }
+            catch (InvalidPasswordException)
+            {
+                await this._alertService.DisplayAlert("Invalid Logindata", "Wrong password");
+                return;
+            }
+            catch (UserNotFoundException)
+            {
+                await this._alertService.DisplayAlert("Invalid Logindata", "User was not found");
+                return;
+            }
 
             this._navigationService.NavigateToShell();
         }
