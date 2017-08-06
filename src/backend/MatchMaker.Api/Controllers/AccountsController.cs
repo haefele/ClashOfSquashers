@@ -1,32 +1,23 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Net.Http;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Dapper;
-using JWT.Algorithms;
-using MatchMaker.Api.AppSettings;
-using MatchMaker.Api.Database;
 using MatchMaker.Api.Entities;
-using MatchMaker.Api.Services;
+using MatchMaker.Api.Services.Jwt;
 using MatchMaker.Shared.Accounts;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Options;
-using Newtonsoft.Json;
+using NPoco;
 
 namespace MatchMaker.Api.Controllers
 {
     [Route("Accounts")]
     public class AccountsController : Controller
     {
-        private readonly IDbConnectionFactory _dbConnectionFactory;
+        private readonly IDatabase _database;
         private readonly IJwtService _jwtService;
 
-        public AccountsController(IDbConnectionFactory dbConnectionFactory, IJwtService jwtService)
+        public AccountsController(IDatabase database, IJwtService jwtService)
         {
-            this._dbConnectionFactory = dbConnectionFactory ?? throw new ArgumentNullException(nameof(dbConnectionFactory));
+            this._database = database ?? throw new ArgumentNullException(nameof(database));
             this._jwtService = jwtService ?? throw new ArgumentNullException(nameof(jwtService));
         }
 
@@ -38,12 +29,13 @@ namespace MatchMaker.Api.Controllers
                 return this.BadRequest();
 
             data.EmailAddress = data.EmailAddress.Trim();
-
-            using (var connection = this._dbConnectionFactory.Create())
-            using (var transaction = connection.BeginTransaction())
+            
+            using (var transaction = this._database.GetTransaction())
             {
-                var existingAccount = await connection.QueryAccountByEmail(data.EmailAddress, transaction, cancellationToken);
-
+                var existingAccount = await this._database.Query<Account>()
+                    .Where(f => f.EmailAddress == data.EmailAddress)
+                    .FirstOrDefaultAsync();
+                
                 if (existingAccount != null)
                     return this.BadRequest("Email address is already in use.");
 
@@ -53,9 +45,9 @@ namespace MatchMaker.Api.Controllers
                     PasswordHash = BCrypt.Net.BCrypt.HashPassword(data.Password),
                 };
 
-                await connection.CreateAccount(account, transaction, cancellationToken);
+                await this._database.InsertAsync(account);
 
-                transaction.Commit();
+                transaction.Complete();
             }
 
             return this.Ok();
@@ -69,11 +61,12 @@ namespace MatchMaker.Api.Controllers
                 return this.BadRequest();
 
             data.EmailAddress = data.EmailAddress.Trim();
-
-            using (var connection = this._dbConnectionFactory.Create())
-            using (var transaction = connection.BeginTransaction())
+            
+            using (var transaction = this._database.GetTransaction())
             {
-                var account = await connection.QueryAccountByEmail(data.EmailAddress, transaction, cancellationToken);
+                var account = await this._database.Query<Account>()
+                    .Where(f => f.EmailAddress == data.EmailAddress)
+                    .FirstOrDefaultAsync();
 
                 if (account == null)
                     return this.NotFound();
@@ -86,7 +79,7 @@ namespace MatchMaker.Api.Controllers
                     Token = this._jwtService.Create(account.Id, account.EmailAddress),
                 };
 
-                transaction.Commit();
+                transaction.Complete();
 
                 return this.Ok(result);
             }

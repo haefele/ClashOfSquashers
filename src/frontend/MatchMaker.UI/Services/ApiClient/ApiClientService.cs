@@ -82,7 +82,7 @@ namespace MatchMaker.UI.Services.ApiClient
             }
         }
 
-        public async Task<MatchDayCompact> CreateNewMatchDay(List<int> participantIds, DateTime when)
+        public async Task<MatchDayCompactDTO> CreateNewMatchDay(List<int> participantIds, DateTime when)
         {
             Guard.NotNullOrEmpty(participantIds, nameof(participantIds));
             Guard.NotInvalidDateTime(when, nameof(when));
@@ -106,14 +106,14 @@ namespace MatchMaker.UI.Services.ApiClient
                     throw new System.Exception();
                 case HttpStatusCode.Created:
                     var contentJson = await response.Content.ReadAsStringAsync();
-                    var content = JsonConvert.DeserializeObject<MatchDayCompact>(contentJson);
+                    var content = JsonConvert.DeserializeObject<MatchDayCompactDTO>(contentJson);
                     return content;
                 default:
                     throw new System.Exception(response.StatusCode.ToString());
             }
         }
 
-        public async Task<Match> GetNextMatch(int matchDayId)
+        public async Task<MatchDTO> GetNextMatch(int matchDayId)
         {
             Guard.NotLessOrEqual(matchDayId, 0, nameof(matchDayId));
 
@@ -139,7 +139,7 @@ namespace MatchMaker.UI.Services.ApiClient
                     throw new System.Exception();
                 case HttpStatusCode.OK:
                     var contentJson = await response.Content.ReadAsStringAsync();
-                    var content = JsonConvert.DeserializeObject<Match>(contentJson);
+                    var content = JsonConvert.DeserializeObject<MatchDTO>(contentJson);
                     return content;
                 default:
                     throw new System.Exception(response.StatusCode.ToString());

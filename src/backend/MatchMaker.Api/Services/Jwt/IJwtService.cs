@@ -1,4 +1,4 @@
-﻿namespace MatchMaker.Api.Services
+﻿namespace MatchMaker.Api.Services.Jwt
 {
     public interface IJwtService
     {
