@@ -1,16 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data.SqlClient;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Data.SqlClient;
 using MatchMaker.Api.AppSettings;
-using MatchMaker.Api.Database;
-using MatchMaker.Api.Services;
+using MatchMaker.Api.Entities;
+using MatchMaker.Api.Services.Jwt;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using NPoco;
+using NPoco.FluentMappings;
 
 namespace MatchMaker.Api
 {
@@ -34,7 +32,21 @@ namespace MatchMaker.Api
             services.Configure<DatabaseSettings>(this.Configuration.GetSection("Database"));
             services.Configure<AccountSettings>(this.Configuration.GetSection("Account"));
 
-            services.AddSingleton<IDbConnectionFactory, SqlDbConnectionFactory>();
+            var factory = DatabaseFactory.Config(f =>
+            {
+                f.UsingDatabase(() => new Database(
+                    this.Configuration.GetSection("Database").GetValue<string>("ConnectionString"),
+                    DatabaseType.SqlServer2012,
+                    SqlClientFactory.Instance));
+                f.WithFluentConfig(FluentMappingConfiguration.Configure(
+                    new AccountMaps(),
+                    new MatchDayMaps(),
+                    new MatchDayParticipantMaps(),
+                    new MatchMaps()));
+            });
+
+            services.AddSingleton<DatabaseFactory>(factory);
+            services.AddSingleton<IDatabase>(f => f.GetService<DatabaseFactory>().GetDatabase());
             services.AddSingleton<IJwtService, JwtService>();
             
             services.AddMvc();

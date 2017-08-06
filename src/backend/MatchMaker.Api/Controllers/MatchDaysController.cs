@@ -1,22 +1,22 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using MatchMaker.Api.Database;
+using MatchMaker.Api.Databases.Queries;
+using MatchMaker.Api.Entities;
 using MatchMaker.Shared.MatchDays;
 using Microsoft.AspNetCore.Mvc;
+using NPoco;
 
 namespace MatchMaker.Api.Controllers
 {
     [Route("MatchDays")]
     public class MatchDaysController : Controller
     {
-        private readonly IDbConnectionFactory _dbConnectionFactory;
+        private readonly IDatabase _database;
 
-        public MatchDaysController(IDbConnectionFactory dbConnectionFactory)
+        public MatchDaysController(IDatabase database)
         {
-            this._dbConnectionFactory = dbConnectionFactory ?? throw new ArgumentNullException(nameof(dbConnectionFactory));
+            this._database = database ?? throw new ArgumentNullException(nameof(database));
         }
 
         [HttpPost]
@@ -24,16 +24,31 @@ namespace MatchMaker.Api.Controllers
         {
             if (data == null || data.ParticipantIds == null || data.ParticipantIds.Count == 0)
                 return this.BadRequest();
-
-            using (var connection = this._dbConnectionFactory.Create())
-            using (var transaction = connection.BeginTransaction())
+            
+            using (var transaction = this._database.GetTransaction())
             {
-                int matchDayId = await connection.CreateMatchDay(data.When, data.ParticipantIds, transaction, cancellationToken);
-                var matchDayCompact = await connection.GetMatchDayCompact(matchDayId, transaction, cancellationToken);
+                var matchday = new MatchDay
+                {
+                    When = data.When
+                };
+                await this._database.InsertAsync(matchday);
 
-                transaction.Commit();
+                foreach (var participantId in data.ParticipantIds)
+                {
+                    var participant = new MatchDayParticipant
+                    {
+                        MatchDayId = matchday.Id,
+                        AccountId = participantId
+                    };
 
-                return this.Created(string.Empty, matchDayCompact);
+                    await this._database.InsertAsync(participant);
+                }
+
+                var result = await this._database.QueryAsync(MatchDayCompactDTOQuery.For(matchday.Id));
+
+                transaction.Complete();
+
+                return this.Created(string.Empty, result);
             }
         }
 

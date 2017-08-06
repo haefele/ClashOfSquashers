@@ -3,20 +3,22 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using MatchMaker.Api.Database;
+using MatchMaker.Api.Databases.Queries;
+using MatchMaker.Api.Entities;
 using MatchMaker.Shared.MatchDays;
 using Microsoft.AspNetCore.Mvc;
+using NPoco;
 
 namespace MatchMaker.Api.Controllers
 {
     [Route("MatchDays")]
     public class MatchesController : Controller
     {
-        private readonly IDbConnectionFactory _dbConnectionFactory;
+        private readonly IDatabase _database;
 
-        public MatchesController(IDbConnectionFactory dbConnectionFactory)
+        public MatchesController(IDatabase database)
         {
-            this._dbConnectionFactory = dbConnectionFactory ?? throw new ArgumentNullException(nameof(dbConnectionFactory));
+            this._database = database ?? throw new ArgumentNullException(nameof(database));
         }
 
         [HttpGet]
@@ -25,12 +27,16 @@ namespace MatchMaker.Api.Controllers
         {
             if (matchDayId <= 0)
                 return this.BadRequest();
-
-            using (var connection = this._dbConnectionFactory.Create())
-            using (var transaction = connection.BeginTransaction())
+            
+            using (var transaction = this._database.GetTransaction())
             {
-                var matches = await connection.GetMatchesFromMatchDay(matchDayId, transaction, cancellationToken);
-                var participants = await connection.GetParticipantsFromMatchDay(matchDayId, transaction, cancellationToken);
+                var matchDay = await this._database.SingleOrDefaultByIdAsync<MatchDay>(matchDayId);
+
+                if (matchDay == null)
+                    return this.NotFound();
+
+                var matches = await this._database.Query<Match>().Where(f => f.MatchDayId == matchDayId).ToListAsync();
+                var participants = await this._database.Query<MatchDayParticipant>().Where(f => f.MatchDayId == matchDayId).ToListAsync();
 
                 if (participants.Count == 0)
                     return this.BadRequest();
@@ -39,22 +45,23 @@ namespace MatchMaker.Api.Controllers
                 foreach (var match in matches)
                 {
                     var uniqueMatch = uniqueMatches.FirstOrDefault(f =>
-                        f.Participant1 == match.Item1 && f.Participant2 == match.Item2 ||
-                        f.Participant1 == match.Item2 && f.Participant1 == match.Item1);
+                        f.Participant1.Id == match.Participant1AccountId && f.Participant2.Id == match.Participant2AccountId ||
+                        f.Participant1.Id == match.Participant2AccountId && f.Participant2.Id == match.Participant1AccountId);
 
                     uniqueMatch.Count++;
                 }
 
                 var nextMatch = uniqueMatches.FirstOrDefault(f => f.Count == uniqueMatches.Select(d => d.Count).Min());
-                var accountCompacts = await connection.GetAccountCompacts(new List<int> { nextMatch.Participant1, nextMatch.Participant2 }, transaction, cancellationToken);
-
-                var result = new Match
+                
+                var result = new MatchDTO
                 {
                     Id = 0,
-                    Number = await connection.GetNextMatchNumberForMatchDay(matchDayId, transaction, cancellationToken),
+                    Number = matches.Any() 
+                        ? matches.Max(f => f.Number) + 1 
+                        : 1,
                     MatchDayId = matchDayId,
-                    Participant1 = accountCompacts.First(f => f.Id == nextMatch.Participant1),
-                    Participant2 = accountCompacts.First(f => f.Id == nextMatch.Participant2),
+                    Participant1 = await this._database.QueryAsync(AccountCompactDTOQuery.For(nextMatch.Participant1.AccountId)),
+                    Participant2 = await this._database.QueryAsync(AccountCompactDTOQuery.For(nextMatch.Participant2.AccountId)),
                     CreatedBy = null,
                     Participant1Points = 0,
                     Participant2Points = 0,
@@ -62,59 +69,81 @@ namespace MatchMaker.Api.Controllers
                     EndTime = null
                 };
 
+                transaction.Complete();
+
                 return this.Ok(result);
             }
         }
-        
+
         [HttpPost]
         [Route("{matchDayId:int}/Matches")]
-        public async Task<IActionResult> SaveMatch(int matchDayId, [FromBody] Match match, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task<IActionResult> SaveMatch(int matchDayId, [FromBody] MatchDTO match, CancellationToken cancellationToken = default(CancellationToken))
         {
             if (matchDayId <= 0 || match == null || match.Participant1 == null || match.Participant2 == null)
                 return this.BadRequest();
-
-            using (var connection = this._dbConnectionFactory.Create())
-            using (var transaction = connection.BeginTransaction())
+            
+            using (var transaction = this._database.GetTransaction())
             {
-                List<int> participants = await connection.GetParticipantsFromMatchDay(matchDayId, transaction, cancellationToken);
+                var participants = await this._database.Query<MatchDayParticipant>()
+                    .Where(f => f.MatchDayId == matchDayId)
+                    .ToListAsync();
 
-                if (participants.Contains(match.Participant1.Id) == false)
+                if (participants.Any(f => f.Id == match.Participant1.Id) == false)
                     return this.BadRequest();
 
-                if (participants.Contains(match.Participant2.Id) == false)
+                if (participants.Any(f => f.Id == match.Participant2.Id) == false)
                     return this.BadRequest();
-                
-                //match.CreatedBy =  ;
-                match.MatchDayId = matchDayId;
 
-                match.Id = await connection.SaveMatch(match, transaction, cancellationToken);
+                var toSave = new Match
+                {
+                    MatchDayId = matchDayId,
+                    //Number = match.Number,
+                    //CreatedByAccountId = 0,
+                    Participant1AccountId = match.Participant1.Id,
+                    Participant2AccountId = match.Participant2.Id,
+                    Participant1Points = match.Participant1Points,
+                    Participant2Points = match.Participant2Points,
+                    StartTime = match.StartTime,
+                    EndTime = match.EndTime
+                };
 
-                transaction.Commit();
+                await this._database.InsertAsync(toSave);
+                var result = await this._database.QueryAsync(MatchDTOQuery.For(toSave.Id));
 
-                return this.Created(string.Empty, match);
+                transaction.Complete();
+
+                return this.Created(string.Empty, result);
             }
         }
 
         [HttpPut]
         [Route("{matchDayId:int}/Matches/{matchId:int}")]
-        public async Task<IActionResult> UpdateMatch(int matchDayId, int matchId, [FromBody] Match match, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task<IActionResult> UpdateMatch(int matchDayId, int matchId, [FromBody] MatchDTO match, CancellationToken cancellationToken = default(CancellationToken))
         {
-            using (var connection = this._dbConnectionFactory.Create())
-            using (var transaction = connection.BeginTransaction())
+            using (var transaction = this._database.GetTransaction())
             {
-                match.Id = matchId;
-                match.MatchDayId = matchDayId;
+                var toUpdate = await this._database.SingleOrDefaultByIdAsync<Match>(matchId);
 
-                await connection.UpdateMatch(match, transaction, cancellationToken);
+                if (toUpdate == null)
+                    return this.BadRequest();
 
-                transaction.Commit();
+                toUpdate.StartTime = match.StartTime;
+                toUpdate.EndTime = match.EndTime;
+                toUpdate.Participant1Points = match.Participant1Points;
+                toUpdate.Participant2Points = match.Participant2Points;
 
-                return this.Ok();
+                await this._database.UpdateAsync(toUpdate);
+
+                var result = await this._database.QueryAsync(MatchDTOQuery.For(toUpdate.Id));
+
+                transaction.Complete();
+
+                return this.Ok(result);
             }
         }
 
         #region Private Methods
-        private List<Matchup> CreateUniqueMatches(List<int> participants)
+        private List<Matchup> CreateUniqueMatches(List<MatchDayParticipant> participants)
         {
             var result = new List<Matchup>();
 
@@ -137,8 +166,8 @@ namespace MatchMaker.Api.Controllers
         #region Internal
         private class Matchup
         {
-            public int Participant1 { get; set; }
-            public int Participant2 { get; set; }
+            public MatchDayParticipant Participant1 { get; set; }
+            public MatchDayParticipant Participant2 { get; set; }
             public int Count { get; set; }
         }
         #endregion

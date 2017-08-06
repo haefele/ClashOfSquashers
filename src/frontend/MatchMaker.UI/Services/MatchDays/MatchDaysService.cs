@@ -13,7 +13,7 @@ namespace MatchMaker.UI.Services.MatchDays
     {
         public IApiClientService ApiClient => DependencyService.Get<IApiClientService>();
 
-        public async Task<MatchDayCompact> CreateNewMatchDay(List<int> participantIds, DateTime when)
+        public async Task<MatchDayCompactDTO> CreateNewMatchDay(List<int> participantIds, DateTime when)
         {
             Guard.NotNullOrEmpty(participantIds, nameof(participantIds));
             Guard.NotInvalidDateTime(when, nameof(when));
@@ -21,7 +21,7 @@ namespace MatchMaker.UI.Services.MatchDays
             return await this.ApiClient.CreateNewMatchDay(participantIds, when);
         }
 
-        public async Task<Match> GetNextMatch(int matchDayId)
+        public async Task<MatchDTO> GetNextMatch(int matchDayId)
         {
             Guard.NotLessOrEqual(matchDayId, 0, nameof(matchDayId));
 

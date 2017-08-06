@@ -7,8 +7,8 @@ namespace MatchMaker.UI.Services.MatchDays
 {
     public interface IMatchDaysService
     {
-        Task<MatchDayCompact> CreateNewMatchDay(List<int> participantIds, DateTime when);
+        Task<MatchDayCompactDTO> CreateNewMatchDay(List<int> participantIds, DateTime when);
 
-        Task<Match> GetNextMatch(int matchDayId);
+        Task<MatchDTO> GetNextMatch(int matchDayId);
     }
 }

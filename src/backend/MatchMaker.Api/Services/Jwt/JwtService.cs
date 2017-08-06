@@ -4,9 +4,10 @@ using JWT;
 using JWT.Algorithms;
 using JWT.Serializers;
 using MatchMaker.Api.AppSettings;
+using MatchMaker.Api.Services.Jwt;
 using Microsoft.Extensions.Options;
 
-namespace MatchMaker.Api.Services
+namespace MatchMaker.Api.Services.Jwt
 {
     public class JwtService : IJwtService
     {
