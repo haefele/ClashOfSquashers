@@ -1,9 +1,9 @@
-﻿using System.Data.SqlClient;
-using MatchMaker.Api.AppSettings;
-using MatchMaker.Api.Entities;
-using MatchMaker.Api.Services.Jwt;
+﻿using System.Threading.Tasks;
+using MatchMaker.Api.Databases;
+using MatchMaker.Api.Setup;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -29,26 +29,9 @@ namespace MatchMaker.Api
 
         public void ConfigureServices(IServiceCollection services)
         {
-            services.Configure<DatabaseSettings>(this.Configuration.GetSection("Database"));
-            services.Configure<AccountSettings>(this.Configuration.GetSection("Account"));
-
-            var factory = DatabaseFactory.Config(f =>
-            {
-                f.UsingDatabase(() => new Database(
-                    this.Configuration.GetSection("Database").GetValue<string>("ConnectionString"),
-                    DatabaseType.SqlServer2012,
-                    SqlClientFactory.Instance));
-                f.WithFluentConfig(FluentMappingConfiguration.Configure(
-                    new AccountMaps(),
-                    new MatchDayMaps(),
-                    new MatchDayParticipantMaps(),
-                    new MatchMaps()));
-            });
-
-            services.AddSingleton<DatabaseFactory>(factory);
-            services.AddSingleton<IDatabase>(f => f.GetService<DatabaseFactory>().GetDatabase());
-            services.AddSingleton<IJwtService, JwtService>();
-            
+            services.AddSettings(this.Configuration);
+            services.AddDatabase(this.Configuration);
+            services.AddMatchMakerServices();
             services.AddMvc();
         }
         
@@ -56,6 +39,26 @@ namespace MatchMaker.Api
         {
             loggerFactory.AddConsole(this.Configuration.GetSection("Logging"));
             loggerFactory.AddDebug();
+
+            app.Use((context, next) =>
+            {
+                var session = context.RequestServices.GetService<IDatabaseSession>();
+
+                bool error = false;
+                try
+                {
+                    next();
+                }
+                catch
+                {
+                    error = true;
+                }
+
+                if (error == false)
+                    session.Commit();
+
+                return Task.CompletedTask;
+            });
 
             app.UseMvc();
         }

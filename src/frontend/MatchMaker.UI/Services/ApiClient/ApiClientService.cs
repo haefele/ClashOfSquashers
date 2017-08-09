@@ -92,7 +92,7 @@ namespace MatchMaker.UI.Services.ApiClient
                 {
                     Id = 1,
                     MatchCount = 10,
-                    Participants = new List<AccountCompactDTO>(participantIds.Select(f => new AccountCompactDTO { Id = f, EmailAddress = f + "lul@lulz.com" })),
+                    Participants = new List<Account>(participantIds.Select(f => new Account { Id = f, EmailAddress = f + "lul@lulz.com" })),
                     When = DateTime.Now
                 };
 
@@ -122,9 +122,9 @@ namespace MatchMaker.UI.Services.ApiClient
                 {
                     MatchDayId = matchDayId,
                     Id = 1,
-                    CreatedBy = new AccountCompactDTO { Id = 1, EmailAddress = "lel@lel.com"},
-                    Participant1 = new AccountCompactDTO { Id = 2, EmailAddress = "rofl@lel.com" },
-                    Participant2 = new AccountCompactDTO { Id = 3, EmailAddress = "lulz@lel.com" },
+                    CreatedBy = new Account { Id = 1, EmailAddress = "lel@lel.com"},
+                    Participant1 = new Account { Id = 2, EmailAddress = "rofl@lel.com" },
+                    Participant2 = new Account { Id = 3, EmailAddress = "lulz@lel.com" },
                     StartTime = DateTime.Now
                     
                 };
