@@ -5,7 +5,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Databases\Maps\" />
+    <Compile Remove="Databases\Maps\**" />
+    <Content Remove="Databases\Maps\**" />
+    <EmbeddedResource Remove="Databases\Maps\**" />
+    <None Remove="Databases\Maps\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Folder Include="wwwroot\" />
   </ItemGroup>
   <ItemGroup>

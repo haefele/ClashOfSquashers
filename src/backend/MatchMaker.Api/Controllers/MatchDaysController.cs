@@ -1,56 +1,31 @@
-﻿//using System;
-//using System.Threading;
-//using System.Threading.Tasks;
-//using MatchMaker.Api.Databases.Queries;
-//using MatchMaker.Api.Entities;
-//using MatchMaker.Shared.MatchDays;
-//using Microsoft.AspNetCore.Mvc;
-//using NPoco;
+﻿using System;
+using System.Threading;
+using System.Threading.Tasks;
+using MatchMaker.Api.Databases;
+using MatchMaker.Shared.MatchDays;
+using Microsoft.AspNetCore.Mvc;
+using NPoco;
 
-//namespace MatchMaker.Api.Controllers
-//{
-//    [Route("MatchDays")]
-//    public class MatchDaysController : Controller
-//    {
-//        private readonly IDatabase _database;
+namespace MatchMaker.Api.Controllers
+{
+    [Route("MatchDays")]
+    public class MatchDaysController : Controller
+    {
+        private readonly IDatabaseSession _databaseSession;
 
-//        public MatchDaysController(IDatabase database)
-//        {
-//            this._database = database ?? throw new ArgumentNullException(nameof(database));
-//        }
+        public MatchDaysController(IDatabaseSession databaseSession)
+        {
+            this._databaseSession = databaseSession;
+        }
 
-//        [HttpPost]
-//        public async Task<IActionResult> CreateNewMatchDay([FromBody]CreateMatchDayData data, CancellationToken cancellationToken = default(CancellationToken))
-//        {
-//            if (data == null || data.ParticipantIds == null || data.ParticipantIds.Count == 0)
-//                return this.BadRequest();
-            
-//            using (var transaction = this._database.GetTransaction())
-//            {
-//                var matchday = new MatchDay
-//                {
-//                    When = data.When
-//                };
-//                await this._database.InsertAsync(matchday);
+        [HttpPost]
+        public async Task<IActionResult> CreateNewMatchDay([FromBody]CreateMatchDayData data, CancellationToken cancellationToken = default(CancellationToken))
+        {
+            if (data == null || data.ParticipantIds == null || data.ParticipantIds.Count == 0)
+                return this.BadRequest();
 
-//                foreach (var participantId in data.ParticipantIds)
-//                {
-//                    var participant = new MatchDayParticipant
-//                    {
-//                        MatchDayId = matchday.Id,
-//                        AccountId = participantId
-//                    };
-
-//                    await this._database.InsertAsync(participant);
-//                }
-
-//                var result = await this._database.QueryAsync(MatchDayCompactDTOQuery.For(matchday.Id));
-
-//                transaction.Complete();
-
-//                return this.Created(string.Empty, result);
-//            }
-//        }
-
-//    }
-//}
+            var matchDay = await this._databaseSession.MatchDayRepository.CreateNewAsync(data.When, data.ParticipantIds, cancellationToken);
+            return this.Created(string.Empty, matchDay);
+        }
+    }
+}

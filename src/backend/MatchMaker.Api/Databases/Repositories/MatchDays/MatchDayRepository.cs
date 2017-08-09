@@ -1,4 +1,7 @@
-﻿using System.Data;
+﻿using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Threading;
 using System.Threading.Tasks;
 using MatchMaker.Shared.MatchDays;
 
@@ -10,11 +13,10 @@ namespace MatchMaker.Api.Databases.Repositories.MatchDays
             : base(transaction)
         {
         }
-
-
-        public Task InsertAsync(MatchDay matchDay)
+        
+        public Task<MatchDay> CreateNewAsync(DateTime when, List<int> participantAccountIds, CancellationToken token)
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
     }
 }
