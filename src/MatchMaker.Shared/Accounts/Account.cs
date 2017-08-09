@@ -1,6 +1,6 @@
 namespace MatchMaker.Shared.Accounts
 {
-    public class AccountCompactDTO
+    public class Account
     {
         public int Id { get; set; }
         public string EmailAddress { get; set; }
