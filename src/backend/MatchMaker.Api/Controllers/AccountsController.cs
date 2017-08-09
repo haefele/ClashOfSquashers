@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using MatchMaker.Api.Databases;
 using MatchMaker.Api.Services.Jwt;
 using MatchMaker.Shared.Accounts;
+using MatchMaker.Shared.Common;
 using Microsoft.AspNetCore.Mvc;
 
 namespace MatchMaker.Api.Controllers
@@ -17,6 +18,10 @@ namespace MatchMaker.Api.Controllers
 
         public AccountsController(IDatabaseSession databaseSession, IJwtService jwtService, IPasswordHasher passwordHasher)
         {
+            Guard.NotNull(databaseSession, nameof(databaseSession));
+            Guard.NotNull(jwtService, nameof(jwtService));
+            Guard.NotNull(passwordHasher, nameof(passwordHasher));
+
             this._databaseSession = databaseSession;
             this._jwtService = jwtService;
             this._passwordHasher = passwordHasher;
@@ -46,7 +51,7 @@ namespace MatchMaker.Api.Controllers
             if (found.account == null)
                 return this.NotFound();
 
-            if (this._passwordHasher.Validate(found.passwordHash, data.Password))
+            if (this._passwordHasher.Validate(found.passwordHash, data.Password) == false)
                 return this.Unauthorized();
 
             var result = new LoginResult

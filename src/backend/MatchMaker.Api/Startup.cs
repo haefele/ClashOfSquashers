@@ -40,26 +40,7 @@ namespace MatchMaker.Api
             loggerFactory.AddConsole(this.Configuration.GetSection("Logging"));
             loggerFactory.AddDebug();
 
-            app.Use((context, next) =>
-            {
-                var session = context.RequestServices.GetService<IDatabaseSession>();
-
-                bool error = false;
-                try
-                {
-                    next();
-                }
-                catch
-                {
-                    error = true;
-                }
-
-                if (error == false)
-                    session.Commit();
-
-                return Task.CompletedTask;
-            });
-
+            app.UseAutoCommit();
             app.UseMvc();
         }
     }
