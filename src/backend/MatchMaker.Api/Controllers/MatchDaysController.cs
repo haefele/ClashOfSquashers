@@ -1,10 +1,9 @@
-﻿using System;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
 using MatchMaker.Api.Databases;
+using MatchMaker.Shared.Common;
 using MatchMaker.Shared.MatchDays;
 using Microsoft.AspNetCore.Mvc;
-using NPoco;
 
 namespace MatchMaker.Api.Controllers
 {
@@ -15,6 +14,8 @@ namespace MatchMaker.Api.Controllers
 
         public MatchDaysController(IDatabaseSession databaseSession)
         {
+            Guard.NotNull(databaseSession, nameof(databaseSession));
+
             this._databaseSession = databaseSession;
         }
 
