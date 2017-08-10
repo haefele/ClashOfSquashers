@@ -113,12 +113,12 @@ namespace MatchMaker.UI.Services.ApiClient
             }
         }
 
-        public async Task<MatchDTO> GetNextMatch(int matchDayId)
+        public async Task<Match> GetNextMatch(int matchDayId)
         {
             Guard.NotLessOrEqual(matchDayId, 0, nameof(matchDayId));
 
             if (this.UseMockData)
-                return new MatchDTO
+                return new Match
                 {
                     MatchDayId = matchDayId,
                     Id = 1,
@@ -139,14 +139,14 @@ namespace MatchMaker.UI.Services.ApiClient
                     throw new System.Exception();
                 case HttpStatusCode.OK:
                     var contentJson = await response.Content.ReadAsStringAsync();
-                    var content = JsonConvert.DeserializeObject<MatchDTO>(contentJson);
+                    var content = JsonConvert.DeserializeObject<Match>(contentJson);
                     return content;
                 default:
                     throw new System.Exception(response.StatusCode.ToString());
             }
         }
         
-        public async Task<MatchDTO> SaveMatch(int matchDayId, MatchDTO match)
+        public async Task<Match> SaveMatch(int matchDayId, Match match)
         {
             if (this.UseMockData)
             {

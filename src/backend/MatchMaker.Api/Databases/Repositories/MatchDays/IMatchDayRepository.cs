@@ -9,5 +9,6 @@ namespace MatchMaker.Api.Databases
     public interface IMatchDayRepository
     {
         Task<MatchDay> CreateNewAsync(DateTime when, List<int> participantAccountIds, CancellationToken token);
+        Task<MatchDay> GetMatchDayAsync(int matchDayId, CancellationToken token);
     }
 }

@@ -26,14 +26,14 @@ namespace MatchMaker.UI.Services.MatchDays
             return await this.ApiClient.CreateNewMatchDay(participantIds, when);
         }
 
-        public async Task<MatchDTO> GetNextMatch(int matchDayId)
+        public async Task<Match> GetNextMatch(int matchDayId)
         {
             Guard.NotLessOrEqual(matchDayId, 0, nameof(matchDayId));
 
             return await this.ApiClient.GetNextMatch(matchDayId);
         }
 
-        public async Task<MatchDTO> SaveMatch(int matchDayId, MatchDTO match)
+        public async Task<Match> SaveMatch(int matchDayId, Match match)
         {
             Guard.NotLessOrEqual(matchDayId, 0, nameof(matchDayId));
             Guard.NotNull(match, nameof(match));

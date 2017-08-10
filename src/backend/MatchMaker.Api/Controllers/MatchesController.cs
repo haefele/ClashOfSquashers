@@ -1,175 +1,135 @@
-﻿//using System;
-//using System.Collections.Generic;
-//using System.Linq;
-//using System.Threading;
-//using System.Threading.Tasks;
-//using MatchMaker.Api.Databases.Queries;
-//using MatchMaker.Api.Entities;
-//using MatchMaker.Shared.MatchDays;
-//using Microsoft.AspNetCore.Mvc;
-//using NPoco;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using MatchMaker.Api.Databases;
+using MatchMaker.Api.Services.NextMatchCalculators;
+using MatchMaker.Shared.Common;
+using MatchMaker.Shared.MatchDays;
+using Microsoft.AspNetCore.Mvc;
+using NPoco;
 
-//namespace MatchMaker.Api.Controllers
-//{
-//    [Route("MatchDays")]
-//    public class MatchesController : Controller
-//    {
-//        private readonly IDatabase _database;
+namespace MatchMaker.Api.Controllers
+{
+    [Route("MatchDays")]
+    public class MatchesController : Controller
+    {
+        private readonly IDatabaseSession _databaseSession;
+        private readonly INextMatchCalculator _nextMatchCalculator;
 
-//        public MatchesController(IDatabase database)
-//        {
-//            this._database = database ?? throw new ArgumentNullException(nameof(database));
-//        }
+        public MatchesController(IDatabaseSession databaseSession, INextMatchCalculator nextMatchCalculator)
+        {
+            Guard.NotNull(databaseSession, nameof(databaseSession));
+            Guard.NotNull(nextMatchCalculator, nameof(nextMatchCalculator));
 
-//        [HttpGet]
-//        [Route("{matchDayId:int}/Matches/Next")]
-//        public async Task<IActionResult> GetNextMatch(int matchDayId, CancellationToken cancellationToken = default(CancellationToken))
-//        {
-//            if (matchDayId <= 0)
-//                return this.BadRequest();
-            
-//            using (var transaction = this._database.GetTransaction())
-//            {
-//                var matchDay = await this._database.SingleOrDefaultByIdAsync<MatchDay>(matchDayId);
+            this._databaseSession = databaseSession;
+            this._nextMatchCalculator = nextMatchCalculator;
+        }
 
-//                if (matchDay == null)
-//                    return this.NotFound();
+        [HttpGet]
+        [Route("{matchDayId:int}/Matches/Next")]
+        public async Task<IActionResult> GetNextMatch(int matchDayId, CancellationToken token)
+        {
+            if (matchDayId <= 0)
+                return this.BadRequest();
 
-//                var matches = await this._database.Query<Match>().Where(f => f.MatchDayId == matchDayId).ToListAsync();
-//                var participants = await this._database.Query<MatchDayParticipant>().Where(f => f.MatchDayId == matchDayId).ToListAsync();
+            var matchDay = await this._databaseSession.MatchDayRepository.GetMatchDayAsync(matchDayId, token);
 
-//                if (participants.Count == 0)
-//                    return this.BadRequest();
+            if (matchDay == null)
+                return this.NotFound();
 
-//                var uniqueMatches = this.CreateUniqueMatches(participants);
-//                foreach (var match in matches)
-//                {
-//                    var uniqueMatch = uniqueMatches.FirstOrDefault(f =>
-//                        f.Participant1.Id == match.Participant1AccountId && f.Participant2.Id == match.Participant2AccountId ||
-//                        f.Participant1.Id == match.Participant2AccountId && f.Participant2.Id == match.Participant1AccountId);
+            var matches = await this._databaseSession.MatchRepository.GetMatchesAsync(matchDay.Id, token);
+            var nextMatchup = this._nextMatchCalculator.CalculateNextMatch(matchDay, matches);
 
-//                    uniqueMatch.Count++;
-//                }
+            var result = new Match
+            {
+                Id = 0,
+                Participant1 = nextMatchup.Participant1,
+                Participant2 = nextMatchup.Participant2,
+                CreatedBy = null,
+                MatchDayId = matchDay.Id,
+                Number = matches.Any() 
+                    ? matches.Max(f => f.Number) + 1
+                    : 1,
+                Participant1Points = 0,
+                Participant2Points = 0,
+                StartTime = null,
+                EndTime = null
+            };
 
-//                var nextMatch = uniqueMatches.FirstOrDefault(f => f.Count == uniqueMatches.Select(d => d.Count).Min());
-                
-//                var result = new MatchDTO
-//                {
-//                    Id = 0,
-//                    Number = matches.Any() 
-//                        ? matches.Max(f => f.Number) + 1 
-//                        : 1,
-//                    MatchDayId = matchDayId,
-//                    Participant1 = await this._database.QueryAsync(AccountCompactDTOQuery.For(nextMatch.Participant1.AccountId)),
-//                    Participant2 = await this._database.QueryAsync(AccountCompactDTOQuery.For(nextMatch.Participant2.AccountId)),
-//                    CreatedBy = null,
-//                    Participant1Points = 0,
-//                    Participant2Points = 0,
-//                    StartTime = null,
-//                    EndTime = null
-//                };
+            return this.Ok(result);
+        }
 
-//                transaction.Complete();
+        [HttpPost]
+        [Route("{matchDayId:int}/Matches")]
+        public async Task<IActionResult> SaveMatch(int matchDayId, [FromBody] Match match, CancellationToken token)
+        {
+            throw new NotImplementedException();
 
-//                return this.Ok(result);
-//            }
-//        }
+            //if (matchDayId <= 0 || match == null || match.Participant1 == null || match.Participant2 == null)
+            //    return this.BadRequest();
 
-//        [HttpPost]
-//        [Route("{matchDayId:int}/Matches")]
-//        public async Task<IActionResult> SaveMatch(int matchDayId, [FromBody] MatchDTO match, CancellationToken cancellationToken = default(CancellationToken))
-//        {
-//            if (matchDayId <= 0 || match == null || match.Participant1 == null || match.Participant2 == null)
-//                return this.BadRequest();
-            
-//            using (var transaction = this._database.GetTransaction())
-//            {
-//                var participants = await this._database.Query<MatchDayParticipant>()
-//                    .Where(f => f.MatchDayId == matchDayId)
-//                    .ToListAsync();
+            //using (var transaction = this._database.GetTransaction())
+            //{
+            //    var participants = await this._database.Query<MatchDayParticipant>()
+            //        .Where(f => f.MatchDayId == matchDayId)
+            //        .ToListAsync();
 
-//                if (participants.Any(f => f.Id == match.Participant1.Id) == false)
-//                    return this.BadRequest();
+            //    if (participants.Any(f => f.Id == match.Participant1.Id) == false)
+            //        return this.BadRequest();
 
-//                if (participants.Any(f => f.Id == match.Participant2.Id) == false)
-//                    return this.BadRequest();
+            //    if (participants.Any(f => f.Id == match.Participant2.Id) == false)
+            //        return this.BadRequest();
 
-//                var toSave = new Match
-//                {
-//                    MatchDayId = matchDayId,
-//                    //Number = match.Number,
-//                    //CreatedByAccountId = 0,
-//                    Participant1AccountId = match.Participant1.Id,
-//                    Participant2AccountId = match.Participant2.Id,
-//                    Participant1Points = match.Participant1Points,
-//                    Participant2Points = match.Participant2Points,
-//                    StartTime = match.StartTime,
-//                    EndTime = match.EndTime
-//                };
+            //    var toSave = new Match
+            //    {
+            //        MatchDayId = matchDayId,
+            //        //Number = match.Number,
+            //        //CreatedByAccountId = 0,
+            //        Participant1AccountId = match.Participant1.Id,
+            //        Participant2AccountId = match.Participant2.Id,
+            //        Participant1Points = match.Participant1Points,
+            //        Participant2Points = match.Participant2Points,
+            //        StartTime = match.StartTime,
+            //        EndTime = match.EndTime
+            //    };
 
-//                await this._database.InsertAsync(toSave);
-//                var result = await this._database.QueryAsync(MatchDTOQuery.For(toSave.Id));
+            //    await this._database.InsertAsync(toSave);
+            //    var result = await this._database.QueryAsync(MatchDTOQuery.For(toSave.Id));
 
-//                transaction.Complete();
+            //    transaction.Complete();
 
-//                return this.Created(string.Empty, result);
-//            }
-//        }
+            //    return this.Created(string.Empty, result);
+            //}
+        }
 
-//        [HttpPut]
-//        [Route("{matchDayId:int}/Matches/{matchId:int}")]
-//        public async Task<IActionResult> UpdateMatch(int matchDayId, int matchId, [FromBody] MatchDTO match, CancellationToken cancellationToken = default(CancellationToken))
-//        {
-//            using (var transaction = this._database.GetTransaction())
-//            {
-//                var toUpdate = await this._database.SingleOrDefaultByIdAsync<Match>(matchId);
+        [HttpPut]
+        [Route("{matchDayId:int}/Matches/{matchId:int}")]
+        public async Task<IActionResult> UpdateMatch(int matchDayId, int matchId, [FromBody] Match match, CancellationToken token)
+        {
+            throw new NotImplementedException();
 
-//                if (toUpdate == null)
-//                    return this.BadRequest();
+            //using (var transaction = this._database.GetTransaction())
+            //{
+            //    var toUpdate = await this._database.SingleOrDefaultByIdAsync<Match>(matchId);
 
-//                toUpdate.StartTime = match.StartTime;
-//                toUpdate.EndTime = match.EndTime;
-//                toUpdate.Participant1Points = match.Participant1Points;
-//                toUpdate.Participant2Points = match.Participant2Points;
+            //    if (toUpdate == null)
+            //        return this.BadRequest();
 
-//                await this._database.UpdateAsync(toUpdate);
+            //    toUpdate.StartTime = match.StartTime;
+            //    toUpdate.EndTime = match.EndTime;
+            //    toUpdate.Participant1Points = match.Participant1Points;
+            //    toUpdate.Participant2Points = match.Participant2Points;
 
-//                var result = await this._database.QueryAsync(MatchDTOQuery.For(toUpdate.Id));
+            //    await this._database.UpdateAsync(toUpdate);
 
-//                transaction.Complete();
+            //    var result = await this._database.QueryAsync(MatchDTOQuery.For(toUpdate.Id));
 
-//                return this.Ok(result);
-//            }
-//        }
+            //    transaction.Complete();
 
-//        #region Private Methods
-//        private List<Matchup> CreateUniqueMatches(List<MatchDayParticipant> participants)
-//        {
-//            var result = new List<Matchup>();
-
-//            for (int i = 0; i < participants.Count; i++)
-//            {
-//                for (int o = i + 1; o < participants.Count; o++)
-//                {
-//                    result.Add(new Matchup
-//                    {
-//                        Participant1 = participants[i],
-//                        Participant2 = participants[o]
-//                    });
-//                }
-//            }
-
-//            return result;
-//        }
-//        #endregion
-
-//        #region Internal
-//        private class Matchup
-//        {
-//            public MatchDayParticipant Participant1 { get; set; }
-//            public MatchDayParticipant Participant2 { get; set; }
-//            public int Count { get; set; }
-//        }
-//        #endregion
-//    }
-//}
+            //    return this.Ok(result);
+            //}
+        }
+    }
+}
