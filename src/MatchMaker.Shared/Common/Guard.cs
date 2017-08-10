@@ -44,12 +44,12 @@ namespace MatchMaker.Shared.Common
         }
 
         [DebuggerStepThrough]
-        public static void NotLessOrEqual(int argument, int value, string argumentName)
+        public static void NotZeroOrNegative(int argument, string argumentName)
         {
             NotNull(argument, argumentName);
 
-            if (argument <= value)
-                throw new ArgumentException("Is less or equal.", argumentName);
+            if (argument <= 0)
+                throw new ArgumentException("Is less or equal 0.", argumentName);
         }
 
         [DebuggerStepThrough]

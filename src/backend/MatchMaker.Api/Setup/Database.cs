@@ -4,6 +4,7 @@ using MatchMaker.Api.AppSettings;
 using MatchMaker.Api.Databases;
 using MatchMaker.Api.Databases.Repositories.Accounts;
 using MatchMaker.Api.Databases.Repositories.MatchDays;
+using MatchMaker.Api.Databases.Repositories.Matches;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -34,6 +35,7 @@ namespace MatchMaker.Api.Setup
             self.AddScoped<IDatabaseSession, DatabaseSession>();
             self.AddScoped<IAccountRepository, AccountRepository>();
             self.AddScoped<IMatchDayRepository, MatchDayRepository>();
+            self.AddScoped<IMatchRepository, MatchRepository>();
         }
 
         public static void UseAutoCommit(this IApplicationBuilder self)

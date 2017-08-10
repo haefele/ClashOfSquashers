@@ -29,6 +29,13 @@ namespace MatchMaker.Api.Databases.Repositories.MatchDays
             return (await this.GetMatchDaysAsync(new List<int> {id}, token)).First();
         }
 
+        public async Task<MatchDay> GetMatchDayAsync(int matchDayId, CancellationToken token)
+        {
+            Guard.NotZeroOrNegative(matchDayId, nameof(matchDayId));
+
+            return (await this.GetMatchDaysAsync(new List<int> {matchDayId}, token)).FirstOrDefault();
+        }
+
         #region SQL
         private async Task<List<MatchDay>> GetMatchDaysAsync(List<int> matchDayIds, CancellationToken token)
         {
