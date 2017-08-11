@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Dapper;
 using MatchMaker.Shared.Accounts;
+using MatchMaker.Shared.Common;
 using MatchMaker.Shared.MatchDays;
 
 namespace MatchMaker.Api.Databases.Repositories.Matches
@@ -18,28 +19,42 @@ namespace MatchMaker.Api.Databases.Repositories.Matches
 
         public async Task<Match> GetMatchAsync(int matchId, CancellationToken token)
         {
+            Guard.NotZeroOrNegative(matchId, nameof(matchId));
+
             return (await this.GetMatchesAsync(new List<int> {matchId}, token)).FirstOrDefault();
         }
 
         public async Task<List<Match>> GetMatchesAsync(int matchDayId, CancellationToken token)
         {
+            Guard.NotZeroOrNegative(matchDayId, nameof(matchDayId));
+
             var matchIds = await this.GetMatchIdsAsync(matchDayId, token);
+
+            if (matchIds.Any() == false)
+                return new List<Match>();
+
             return await this.GetMatchesAsync(matchIds, token);
         }
         public async Task<Match> CreateMatchAsync(Match match, CancellationToken token)
         {
+            Guard.NotNull(match, nameof(match));
+
             var id = await this.InsertMatchAsync(match, token);
             return (await this.GetMatchesAsync(new List<int> {id}, token)).First();
         }
 
         public Task UpdateMatchAsync(Match match, CancellationToken token)
         {
+            Guard.NotNull(match, nameof(match));
+
             return this.UpdateMatchAsyncInternal(match, token);
         }
 
         #region SQL
         private async Task<List<int>> GetMatchIdsAsync(int matchDayId, CancellationToken token)
         {
+            Guard.NotZeroOrNegative(matchDayId, nameof(matchDayId));
+
             const string sql = @"
 SELECT M.Id
 FROM dbo.Matches M
@@ -49,6 +64,8 @@ WHERE M.MatchDayId = @MatchDayId";
         }
         private async Task<List<Match>> GetMatchesAsync(List<int> matchIds, CancellationToken token)
         {
+            Guard.NotNullOrEmpty(matchIds, nameof(matchIds));
+
             const string sql = @"
 SELECT M.Id, M.Number, M.MatchDayId, M.Participant1Points, M.Participant2Points, M.StartTime, M.EndTime
 FROM dbo.Matches M
@@ -116,6 +133,11 @@ WHERE M.Id IN (@MatchIds);";
         }
         private Task<int> InsertMatchAsync(Match match, CancellationToken token)
         {
+            Guard.NotNull(match, nameof(match));
+            Guard.NotNull(match.CreatedBy, nameof(match.CreatedBy));
+            Guard.NotNull(match.Participant1, nameof(match.Participant1));
+            Guard.NotNull(match.Participant2, nameof(match.Participant2));
+
             const string sql = @"
 INSERT INTO dbo.Matches (MatchDayId, Number, CreatedByParticipantId, Participant1Id, Participant2Id, StartTime)
 VALUES 
@@ -142,6 +164,11 @@ SELECT SCOPE_IDENTITY();";
         }
         private Task UpdateMatchAsyncInternal(Match match, CancellationToken token)
         {
+            Guard.NotNull(match, nameof(match));
+            Guard.NotZeroOrNegative(match.Id, nameof(match.Id));
+            Guard.NotZeroOrNegative(match.Participant1Points, nameof(match.Participant1Points));
+            Guard.NotZeroOrNegative(match.Participant2Points, nameof(match.Participant2Points));
+
             const string sql = @"
 UPDATE dbo.Matches
 SET 
@@ -152,6 +179,7 @@ SET
 WHERE Id = @MatchId";
             var parameters = new
             {
+                MatchId = match.Id,
                 Participant1Points = match.Participant1Points,
                 Participant2Points = match.Participant2Points,
                 StartTime = match.StartTime,

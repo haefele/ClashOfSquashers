@@ -3,6 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using MatchMaker.Api.Databases;
 using MatchMaker.Api.Services.Jwt;
+using MatchMaker.Api.Services.PasswordHasher;
 using MatchMaker.Shared.Accounts;
 using MatchMaker.Shared.Common;
 using Microsoft.AspNetCore.Mvc;

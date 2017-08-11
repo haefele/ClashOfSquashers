@@ -1,6 +1,6 @@
 ﻿using MatchMaker.Shared.Common;
 
-namespace MatchMaker.Api.Databases
+namespace MatchMaker.Api.Services.PasswordHasher
 {
     public class BCryptPasswordHasher : IPasswordHasher
     {
