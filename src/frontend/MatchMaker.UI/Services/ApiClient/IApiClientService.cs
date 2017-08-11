@@ -11,7 +11,7 @@ namespace MatchMaker.UI.Services.ApiClient
 
         Task<string> Login(string email, string password);
 
-        Task<MatchDayCompactDTO> CreateNewMatchDay(List<int> participantIds, DateTime when);
+        Task<MatchDay> CreateNewMatchDay(List<int> participantIds, DateTime when);
 
         Task<Match> GetNextMatch(int matchDayId);
 
