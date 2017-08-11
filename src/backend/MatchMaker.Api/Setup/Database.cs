@@ -1,5 +1,7 @@
+using System;
 using System.Data;
 using System.Data.SqlClient;
+using System.Diagnostics;
 using MatchMaker.Api.AppSettings;
 using MatchMaker.Api.Databases;
 using MatchMaker.Api.Databases.Repositories.Accounts;
@@ -47,8 +49,11 @@ namespace MatchMaker.Api.Setup
                 {
                     await next();
                 }
-                catch
+                catch (Exception exception)
                 {
+                    if (Debugger.IsAttached)
+                        Debugger.Break();
+
                     error = true;
                 }
 

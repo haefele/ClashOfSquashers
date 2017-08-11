@@ -113,7 +113,7 @@ namespace MatchMaker.Api.Controllers
             return this.Created(string.Empty, result);
         }
 
-        [HttpPatch]
+        [HttpPut]
         [Route("{matchDayId:int}/Matches/{matchId:int}")]
         public async Task<IActionResult> UpdateMatch(int matchDayId, int matchId, [FromBody] Match match, CancellationToken token)
         {

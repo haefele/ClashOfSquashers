@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Dapper;
+using MatchMaker.Api.Services.PasswordHasher;
 using MatchMaker.Shared.Accounts;
 using MatchMaker.Shared.Common;
 
@@ -58,27 +59,39 @@ namespace MatchMaker.Api.Databases.Repositories.Accounts
         #region SQL
         private Task<bool> EmailExistsAsync(string emailAddress, CancellationToken token)
         {
-            const string sql = "SELECT TOP 1 1 " +
-                               "FROM dbo.Accounts A " +
-                               "WHERE A.EmailAddress = @EmailAddress";
+            Guard.NotNullOrWhiteSpace(emailAddress, nameof(emailAddress));
+
+            const string sql = @"
+SELECT TOP 1 1 
+FROM dbo.Accounts A 
+WHERE A.EmailAddress = @EmailAddress";
 
             return this.Connection.ExecuteScalarAsync<bool>(this.AsCommand(sql, new {EmailAddress = emailAddress}, token));
         }
 
         private Task<int> InsertIntoAccountsAsync(string emailAddress, string passwordHash, CancellationToken token)
         {
-            const string sql = "INSERT INTO dbo.Accounts (EmailAddress, PasswordHash)" +
-                               "VALUES (@EmailAddress, @PasswordHash);" +
+            Guard.NotNullOrWhiteSpace(emailAddress, nameof(emailAddress));
+            Guard.NotNullOrWhiteSpace(passwordHash, nameof(passwordHash));
 
-                               "SELECT SCOPE_IDENTITY();";
+            const string sql = @"
+INSERT INTO dbo.Accounts (EmailAddress, PasswordHash) 
+VALUES (@EmailAddress, @PasswordHash); 
+
+SELECT SCOPE_IDENTITY();";
+
             return this.Connection.ExecuteScalarAsync<int>(this.AsCommand(sql, new { EmailAddress = emailAddress, PasswordHash = passwordHash }, token));
         }
 
         private async Task<AccountWithPasswordHash> GetAccountWithPasswordHashAsync(string emailAddress, CancellationToken token)
         {
-            const string sql = "SELECT A.Id, A.EmailAddress, A.PasswordHash " +
-                               "FROM dbo.Accounts A " +
-                               "WHERE A.EmailAddress = @EmailAddress";
+            Guard.NotNullOrWhiteSpace(emailAddress, nameof(emailAddress));
+
+            const string sql = @"
+SELECT A.Id, A.EmailAddress, A.PasswordHash 
+FROM dbo.Accounts A 
+WHERE A.EmailAddress = @EmailAddress";
+
             return (await this.Connection.QueryAsync<AccountWithPasswordHash>(this.AsCommand(sql, new {EmailAddress = emailAddress}, token))).FirstOrDefault();
         }
 

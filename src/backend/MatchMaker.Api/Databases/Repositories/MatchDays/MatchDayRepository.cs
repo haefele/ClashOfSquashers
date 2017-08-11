@@ -39,24 +39,28 @@ namespace MatchMaker.Api.Databases.Repositories.MatchDays
         #region SQL
         private async Task<List<MatchDay>> GetMatchDaysAsync(List<int> matchDayIds, CancellationToken token)
         {
-            const string sql = "SELECT MD.Id, MD.[When] " +
-                               "FROM dbo.MatchDays MD " +
-                               "WHERE MD.Id IN (@MatchDayIds);" +
-                               
-                               "SELECT MDP.MatchDayId, ParticipantId = MDP.Id, AccountId = A.Id, A.EmailAddress " +
-                               "FROM dbo.MatchDayParticipants MDP " +
-                               "INNER JOIN dbo.Accounts A ON MDP.AccountId = A.Id " +
-                               "WHERE MDP.MatchDayId IN (@MatchDayIds);" +
+            Guard.NotNullOrEmpty(matchDayIds, nameof(matchDayIds));
 
-                               "SELECT M.MatchDayId, Count = COUNT(*) " +
-                               "FROM dbo.Matches M " +
-                               "WHERE M.MatchDayId IN (@MatchDayIds) " +
-                               "GROUP BY M.MatchDayId";
+            const string sql = @"
+SELECT MD.Id, MD.[When] 
+FROM dbo.MatchDays MD 
+WHERE MD.Id IN (@MatchDayIds);
+
+SELECT MDP.MatchDayId, ParticipantId = MDP.Id, AccountId = A.Id, A.EmailAddress 
+FROM dbo.MatchDayParticipants MDP 
+INNER JOIN dbo.Accounts A ON MDP.AccountId = A.Id 
+WHERE MDP.MatchDayId IN (@MatchDayIds);
+
+SELECT M.MatchDayId, Count = COUNT(*) 
+FROM dbo.Matches M 
+WHERE M.MatchDayId IN (@MatchDayIds) 
+GROUP BY M.MatchDayId";
+
             using (var multi = await this.Connection.QueryMultipleAsync(this.AsCommand(sql, new {MatchDayIds = matchDayIds}, token)))
             {
-                var matchDays = multi.Read<MatchDay>().ToList();
-                var participants = multi.Read().ToList();
-                var counts = multi.Read().ToList();
+                var matchDays = (await multi.ReadAsync<MatchDay>()).ToList();
+                var participants = (await multi.ReadAsync()).ToList();
+                var counts = (await multi.ReadAsync()).ToList();
 
                 foreach (var day in matchDays)
                 {
@@ -78,18 +82,27 @@ namespace MatchMaker.Api.Databases.Repositories.MatchDays
                 return matchDays;
             }
         }
-
         private Task<int> InsertIntoMatchDaysAsync(DateTime when, CancellationToken token)
         {
-            const string sql = "INSERT INTO dbo.MatchDays ([When]) VALUES(@When); " +
-                               "SELECT SCOPE_IDENTITY();";
+            Guard.NotInvalidDateTime(when, nameof(when));
+
+            const string sql = @"
+INSERT INTO dbo.MatchDays ([When]) 
+VALUES(@When); 
+
+SELECT SCOPE_IDENTITY();";
+
             return this.Connection.ExecuteScalarAsync<int>(this.AsCommand(sql, new {When = when}, token));
         }
-
         private Task InsertIntoMatchDayParticipantsAsync(int matchDayId, List<int> participantAccountIds, CancellationToken token)
         {
-            const string sql = "INSERT INTO dbo.MatchDayParticipants (MatchDayId, AccountId) " +
-                               "VALUES (@MatchDayId, @AccountId)";
+            Guard.NotZeroOrNegative(matchDayId, nameof(matchDayId));
+            Guard.NotNullOrEmpty(participantAccountIds, nameof(participantAccountIds));
+
+            const string sql = @"
+INSERT INTO dbo.MatchDayParticipants (MatchDayId, AccountId) 
+VALUES (@MatchDayId, @AccountId)";
+
             return this.Connection.ExecuteAsync(this.AsCommand(sql, participantAccountIds.Select(f => new {MatchDayId = matchDayId, AccountId = f}), token));
         }
         #endregion

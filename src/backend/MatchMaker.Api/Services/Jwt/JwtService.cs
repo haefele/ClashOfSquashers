@@ -5,6 +5,7 @@ using JWT.Algorithms;
 using JWT.Serializers;
 using MatchMaker.Api.AppSettings;
 using MatchMaker.Api.Services.Jwt;
+using MatchMaker.Shared.Common;
 using Microsoft.Extensions.Options;
 
 namespace MatchMaker.Api.Services.Jwt
@@ -17,7 +18,9 @@ namespace MatchMaker.Api.Services.Jwt
 
         public JwtService(IOptions<AccountSettings> accountSettings)
         {
-            this._accountSettings = accountSettings ?? throw new ArgumentNullException(nameof(accountSettings));
+            Guard.NotNull(accountSettings, nameof(accountSettings));
+
+            this._accountSettings = accountSettings;
 
             var algorithm = new HMACSHA256Algorithm();
             var serializer = new JsonNetSerializer();
@@ -31,6 +34,9 @@ namespace MatchMaker.Api.Services.Jwt
 
         public string Create(int accountId, string emailAddress)
         {
+            Guard.NotZeroOrNegative(accountId, nameof(accountId));
+            Guard.NotNullOrWhiteSpace(emailAddress, nameof(emailAddress));
+
             var payload = new Dictionary<string, object>
             {
                 ["account-id"] = accountId,
@@ -42,6 +48,8 @@ namespace MatchMaker.Api.Services.Jwt
 
         public bool Validate(string token)
         {
+            Guard.NotNullOrWhiteSpace(token, nameof(token));
+
             try
             {
                 this._decoder.Decode(token, this._accountSettings.Value.JwtSecret, verify: true);

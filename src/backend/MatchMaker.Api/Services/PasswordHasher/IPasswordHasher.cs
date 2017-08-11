@@ -1,4 +1,4 @@
-﻿namespace MatchMaker.Api.Databases
+﻿namespace MatchMaker.Api.Services.PasswordHasher
 {
     public interface IPasswordHasher
     {

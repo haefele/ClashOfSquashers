@@ -1,6 +1,7 @@
 ﻿using System.Data;
 using System.Threading;
 using Dapper;
+using MatchMaker.Shared.Common;
 
 namespace MatchMaker.Api.Databases.Repositories
 {
@@ -11,6 +12,8 @@ namespace MatchMaker.Api.Databases.Repositories
 
         protected BaseRepository(IDbTransaction transaction)
         {
+            Guard.NotNull(transaction, nameof(transaction));
+
             this.Connection = transaction.Connection;
             this.Transaction = transaction;
         }

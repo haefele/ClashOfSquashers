@@ -1,6 +1,7 @@
 using MatchMaker.Api.Databases;
 using MatchMaker.Api.Services.Jwt;
 using MatchMaker.Api.Services.NextMatchCalculators;
+using MatchMaker.Api.Services.PasswordHasher;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace MatchMaker.Api.Setup
@@ -11,7 +12,7 @@ namespace MatchMaker.Api.Setup
         {
             self.AddTransient<IJwtService, JwtService>();
             self.AddTransient<IPasswordHasher, BCryptPasswordHasher>();
-            self.AddScoped<INextMatchCalculator, NextMatchCalculator>();
+            self.AddTransient<INextMatchCalculator, NextMatchCalculator>();
         }
     }
 }
