@@ -16,16 +16,25 @@ namespace MatchMaker.Api.Databases.Repositories.Matches
         {
         }
 
+        public async Task<Match> GetMatchAsync(int matchId, CancellationToken token)
+        {
+            return (await this.GetMatchesAsync(new List<int> {matchId}, token)).FirstOrDefault();
+        }
+
         public async Task<List<Match>> GetMatchesAsync(int matchDayId, CancellationToken token)
         {
             var matchIds = await this.GetMatchIdsAsync(matchDayId, token);
             return await this.GetMatchesAsync(matchIds, token);
         }
-
-        public Task<Match> CreateMatchAsync(Match match, CancellationToken token)
+        public async Task<Match> CreateMatchAsync(Match match, CancellationToken token)
         {
+            var id = await this.InsertMatchAsync(match, token);
+            return (await this.GetMatchesAsync(new List<int> {id}, token)).First();
+        }
 
-            throw new System.NotImplementedException();
+        public Task UpdateMatchAsync(Match match, CancellationToken token)
+        {
+            return this.UpdateMatchAsyncInternal(match, token);
         }
 
         #region SQL
@@ -105,16 +114,51 @@ WHERE M.Id IN (@MatchIds);";
                 return matches;
             }
         }
-
         private Task<int> InsertMatchAsync(Match match, CancellationToken token)
         {
             const string sql = @"
-INSERT INTO dbo.Matches (MatchDayId, Number, CreatedByAccountId, Participant1AccountId, Participant2AccountId, StartTime)
-VALUES (@MatchDayId, (SELECT COUNT(*) + 1 FROM dbo.Matches MM WHERE MM.MatchDayId = @MatchDayId), @CreatedByAccountId, @Participant1AccountId, @Participant2AccountId, @StartTime);
+INSERT INTO dbo.Matches (MatchDayId, Number, CreatedByParticipantId, Participant1Id, Participant2Id, StartTime)
+VALUES 
+(
+	@MatchDayId, 
+	(SELECT COUNT(*) + 1 FROM dbo.Matches M WHERE M.MatchDayId = @MatchDayId),
+	(SELECT MDP.Id FROM dbo.MatchDayParticipants MDP WHERE MDP.MatchDayId = @MatchDayId AND MDP.Id = @CreatedByParticipantId),
+	(SELECT MDP.Id FROM dbo.MatchDayParticipants MDP WHERE MDP.MatchDayId = @MatchDayId AND MDP.Id = @Participant1Id),
+	(SELECT MDP.Id FROM dbo.MatchDayParticipants MDP WHERE MDP.MatchDayId = @MatchDayId AND MDP.Id = @Participant2Id),
+	@StartTime
+);
 
 SELECT SCOPE_IDENTITY();";
 
-            return this.Connection.ExecuteScalarAsync<int>(this.AsCommand(sql, new { MatchDayId = match.MatchDayId, CreatedByAccountId = match.CreatedBy.Id }, token));
+            var parameters = new
+            {
+                MatchDayId = match.MatchDayId,
+                CreatedByParticipantId = match.CreatedBy.Id,
+                Participant1Id = match.Participant1.Id,
+                Participant2Id = match.Participant2.Id,
+                StartTime = match.StartTime
+            };
+            return this.Connection.ExecuteScalarAsync<int>(this.AsCommand(sql, parameters, token));
+        }
+        private Task UpdateMatchAsyncInternal(Match match, CancellationToken token)
+        {
+            const string sql = @"
+UPDATE dbo.Matches
+SET 
+	Participant1Points = @Participant1Points,
+	Participant2Points = @Participant2Points,
+	StartTime = @StartTime,
+	EndTime = @EndTime
+WHERE Id = @MatchId";
+            var parameters = new
+            {
+                Participant1Points = match.Participant1Points,
+                Participant2Points = match.Participant2Points,
+                StartTime = match.StartTime,
+                EndTime = match.EndTime
+            };
+
+            return this.Connection.ExecuteAsync(this.AsCommand(sql, parameters, token));
         }
         #endregion
     }
