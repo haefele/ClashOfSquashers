@@ -8,7 +8,6 @@ using MatchMaker.Api.Services.NextMatchCalculators;
 using MatchMaker.Shared.Common;
 using MatchMaker.Shared.MatchDays;
 using Microsoft.AspNetCore.Mvc;
-using NPoco;
 
 namespace MatchMaker.Api.Controllers
 {
