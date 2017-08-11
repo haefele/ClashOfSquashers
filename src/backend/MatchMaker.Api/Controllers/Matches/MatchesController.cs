@@ -1,18 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using MatchMaker.Api.Databases;
 using MatchMaker.Api.Services.NextMatchCalculators;
 using MatchMaker.Shared.Common;
 using MatchMaker.Shared.MatchDays;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace MatchMaker.Api.Controllers
+namespace MatchMaker.Api.Controllers.Matches
 {
     [Route("MatchDays")]
-    public class MatchesController : Controller
+    public class MatchesController : MatchMakerController
     {
         private readonly IDatabaseSession _databaseSession;
         private readonly INextMatchCalculator _nextMatchCalculator;
@@ -26,6 +25,7 @@ namespace MatchMaker.Api.Controllers
             this._nextMatchCalculator = nextMatchCalculator;
         }
 
+        [Authorize]
         [HttpGet]
         [Route("{matchDayId:int}/Matches")]
         public async Task<IActionResult> GetMatches(int matchDayId, CancellationToken token)
@@ -42,6 +42,7 @@ namespace MatchMaker.Api.Controllers
             return this.Ok(matches);
         }
 
+        [Authorize]
         [HttpGet]
         [Route("{matchDayId:int}/Matches/{matchId:int}")]
         public async Task<IActionResult> GetMatch(int matchDayId, int matchId, CancellationToken token)
@@ -57,6 +58,7 @@ namespace MatchMaker.Api.Controllers
             return this.Ok(match);
         }
 
+        [Authorize]
         [HttpGet]
         [Route("{matchDayId:int}/Matches/Next")]
         public async Task<IActionResult> GetNextMatch(int matchDayId, CancellationToken token)
@@ -91,6 +93,7 @@ namespace MatchMaker.Api.Controllers
             return this.Ok(result);
         }
 
+        [Authorize]
         [HttpPost]
         [Route("{matchDayId:int}/Matches")]
         public async Task<IActionResult> SaveMatch(int matchDayId, [FromBody] Match match, CancellationToken token)
@@ -112,6 +115,7 @@ namespace MatchMaker.Api.Controllers
             return this.Created(string.Empty, result);
         }
 
+        [Authorize]
         [HttpPut]
         [Route("{matchDayId:int}/Matches/{matchId:int}")]
         public async Task<IActionResult> UpdateMatch(int matchDayId, int matchId, [FromBody] Match match, CancellationToken token)

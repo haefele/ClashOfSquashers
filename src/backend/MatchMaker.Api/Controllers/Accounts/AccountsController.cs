@@ -1,5 +1,4 @@
-﻿using System;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
 using MatchMaker.Api.Databases;
 using MatchMaker.Api.Services.Jwt;
@@ -8,10 +7,10 @@ using MatchMaker.Shared.Accounts;
 using MatchMaker.Shared.Common;
 using Microsoft.AspNetCore.Mvc;
 
-namespace MatchMaker.Api.Controllers
+namespace MatchMaker.Api.Controllers.Accounts
 {
     [Route("Accounts")]
-    public class AccountsController : Controller
+    public class AccountsController : MatchMakerController
     {
         private readonly IDatabaseSession _databaseSession;
         private readonly IJwtService _jwtService;

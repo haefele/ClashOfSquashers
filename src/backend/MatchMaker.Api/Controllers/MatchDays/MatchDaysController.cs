@@ -3,12 +3,13 @@ using System.Threading.Tasks;
 using MatchMaker.Api.Databases;
 using MatchMaker.Shared.Common;
 using MatchMaker.Shared.MatchDays;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace MatchMaker.Api.Controllers
+namespace MatchMaker.Api.Controllers.MatchDays
 {
     [Route("MatchDays")]
-    public class MatchDaysController : Controller
+    public class MatchDaysController : MatchMakerController
     {
         private readonly IDatabaseSession _databaseSession;
 
@@ -19,6 +20,7 @@ namespace MatchMaker.Api.Controllers
             this._databaseSession = databaseSession;
         }
 
+        [Authorize]
         [HttpPost]
         public async Task<IActionResult> CreateNewMatchDay([FromBody]CreateMatchDayData data, CancellationToken cancellationToken = default(CancellationToken))
         {
