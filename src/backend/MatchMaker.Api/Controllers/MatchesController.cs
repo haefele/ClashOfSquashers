@@ -65,43 +65,21 @@ namespace MatchMaker.Api.Controllers
         [Route("{matchDayId:int}/Matches")]
         public async Task<IActionResult> SaveMatch(int matchDayId, [FromBody] Match match, CancellationToken token)
         {
-            throw new NotImplementedException();
+            if (matchDayId <= 0 || match == null || match.Participant1 == null || match.Participant2 == null)
+                return this.BadRequest();
 
-            //if (matchDayId <= 0 || match == null || match.Participant1 == null || match.Participant2 == null)
-            //    return this.BadRequest();
+            var matchDay = await this._databaseSession.MatchDayRepository.GetMatchDayAsync(matchDayId, token);
 
-            //using (var transaction = this._database.GetTransaction())
-            //{
-            //    var participants = await this._database.Query<MatchDayParticipant>()
-            //        .Where(f => f.MatchDayId == matchDayId)
-            //        .ToListAsync();
+            if (matchDay.Participants.Any(f => f.Id == match.Participant1.Id) == false)
+                return this.BadRequest();
 
-            //    if (participants.Any(f => f.Id == match.Participant1.Id) == false)
-            //        return this.BadRequest();
+            if (matchDay.Participants.Any(f => f.Id == match.Participant2.Id) == false)
+                return this.BadRequest();
+            
+            match.MatchDayId = matchDayId;
 
-            //    if (participants.Any(f => f.Id == match.Participant2.Id) == false)
-            //        return this.BadRequest();
-
-            //    var toSave = new Match
-            //    {
-            //        MatchDayId = matchDayId,
-            //        //Number = match.Number,
-            //        //CreatedByAccountId = 0,
-            //        Participant1AccountId = match.Participant1.Id,
-            //        Participant2AccountId = match.Participant2.Id,
-            //        Participant1Points = match.Participant1Points,
-            //        Participant2Points = match.Participant2Points,
-            //        StartTime = match.StartTime,
-            //        EndTime = match.EndTime
-            //    };
-
-            //    await this._database.InsertAsync(toSave);
-            //    var result = await this._database.QueryAsync(MatchDTOQuery.For(toSave.Id));
-
-            //    transaction.Complete();
-
-            //    return this.Created(string.Empty, result);
-            //}
+            Match result = await this._databaseSession.MatchRepository.CreateMatchAsync(match, token);
+            return this.Created(string.Empty, result);
         }
 
         [HttpPut]

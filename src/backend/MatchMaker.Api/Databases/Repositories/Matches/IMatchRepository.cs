@@ -8,5 +8,6 @@ namespace MatchMaker.Api.Databases.Repositories.Matches
     public interface IMatchRepository
     {
         Task<List<Match>> GetMatchesAsync(int matchDayId, CancellationToken token);
+        Task<Match> CreateMatchAsync(Match match, CancellationToken token);
     }
 }
