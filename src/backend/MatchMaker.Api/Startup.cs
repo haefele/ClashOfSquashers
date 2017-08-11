@@ -1,9 +1,6 @@
-﻿using System.Threading.Tasks;
-using MatchMaker.Api.Databases;
-using MatchMaker.Api.Setup;
+﻿using MatchMaker.Api.Setup;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -30,13 +27,15 @@ namespace MatchMaker.Api
             services.AddDatabase(this.Configuration);
             services.AddMatchMakerServices();
             services.AddMvc();
+            services.AddAuthorization();
         }
         
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
         {
             loggerFactory.AddConsole(this.Configuration.GetSection("Logging"));
             loggerFactory.AddDebug();
-
+            
+            app.UseAuthentication();
             app.UseAutoCommit();
             app.UseMvc();
         }

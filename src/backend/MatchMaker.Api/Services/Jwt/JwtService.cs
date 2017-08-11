@@ -39,8 +39,8 @@ namespace MatchMaker.Api.Services.Jwt
 
             var payload = new Dictionary<string, object>
             {
-                ["account-id"] = accountId,
-                ["email-address"] = emailAddress
+                [JwtClaims.AccountId] = accountId,
+                [JwtClaims.EmailAddress] = emailAddress
             };
 
             return this._encoder.Encode(payload, this._accountSettings.Value.JwtSecret);
