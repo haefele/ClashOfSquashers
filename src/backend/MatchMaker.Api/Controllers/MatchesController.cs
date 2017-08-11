@@ -28,6 +28,37 @@ namespace MatchMaker.Api.Controllers
         }
 
         [HttpGet]
+        [Route("{matchDayId:int}/Matches")]
+        public async Task<IActionResult> GetMatches(int matchDayId, CancellationToken token)
+        {
+            if (matchDayId <= 0)
+                return this.BadRequest();
+
+            var matchDay = await this._databaseSession.MatchDayRepository.GetMatchDayAsync(matchDayId, token);
+
+            if (matchDay == null)
+                return this.NotFound();
+
+            var matches = await this._databaseSession.MatchRepository.GetMatchesAsync(matchDayId, token);
+            return this.Ok(matches);
+        }
+
+        [HttpGet]
+        [Route("{matchDayId:int}/Matches/{matchId:int}")]
+        public async Task<IActionResult> GetMatch(int matchDayId, int matchId, CancellationToken token)
+        {
+            if (matchDayId <= 0 || matchId <= 0)
+                return this.BadRequest();
+
+            var match = await this._databaseSession.MatchRepository.GetMatchAsync(matchId, token);
+
+            if (match == null || match.MatchDayId != matchDayId)
+                return this.NotFound();
+
+            return this.Ok(match);
+        }
+
+        [HttpGet]
         [Route("{matchDayId:int}/Matches/Next")]
         public async Task<IActionResult> GetNextMatch(int matchDayId, CancellationToken token)
         {
@@ -82,32 +113,26 @@ namespace MatchMaker.Api.Controllers
             return this.Created(string.Empty, result);
         }
 
-        [HttpPut]
+        [HttpPatch]
         [Route("{matchDayId:int}/Matches/{matchId:int}")]
         public async Task<IActionResult> UpdateMatch(int matchDayId, int matchId, [FromBody] Match match, CancellationToken token)
         {
-            throw new NotImplementedException();
+            if (matchDayId <= 0 || matchId <= 0 || match == null)
+                return this.BadRequest();
 
-            //using (var transaction = this._database.GetTransaction())
-            //{
-            //    var toUpdate = await this._database.SingleOrDefaultByIdAsync<Match>(matchId);
+            var existingMatch = await this._databaseSession.MatchRepository.GetMatchAsync(matchId, token);
 
-            //    if (toUpdate == null)
-            //        return this.BadRequest();
+            if (existingMatch == null || existingMatch.MatchDayId != matchDayId)
+                return this.NotFound();
 
-            //    toUpdate.StartTime = match.StartTime;
-            //    toUpdate.EndTime = match.EndTime;
-            //    toUpdate.Participant1Points = match.Participant1Points;
-            //    toUpdate.Participant2Points = match.Participant2Points;
+            existingMatch.StartTime = match.StartTime;
+            existingMatch.EndTime = match.EndTime;
+            existingMatch.Participant1Points = match.Participant1Points;
+            existingMatch.Participant2Points = match.Participant2Points;
 
-            //    await this._database.UpdateAsync(toUpdate);
+            await this._databaseSession.MatchRepository.UpdateMatchAsync(existingMatch, token);
 
-            //    var result = await this._database.QueryAsync(MatchDTOQuery.For(toUpdate.Id));
-
-            //    transaction.Complete();
-
-            //    return this.Ok(result);
-            //}
+            return this.Ok(existingMatch);
         }
     }
 }
