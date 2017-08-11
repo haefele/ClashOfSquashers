@@ -19,7 +19,7 @@ namespace MatchMaker.UI.Views.MatchDay
 
         private bool _isNew;
 
-        private MatchDayCompactDTO _matchDay;
+        private Shared.MatchDays.MatchDay _matchDay;
         private ObservableCollection<Shared.MatchDays.Match> _matches;
 
         public bool IsNew
@@ -28,7 +28,7 @@ namespace MatchMaker.UI.Views.MatchDay
             set { this.SetProperty(ref this._isNew, value); }
         }
 
-        public MatchDayCompactDTO MatchDay
+        public Shared.MatchDays.MatchDay MatchDay
         {
             get { return this._matchDay; }
             set

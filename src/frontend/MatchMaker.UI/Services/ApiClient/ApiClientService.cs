@@ -82,17 +82,17 @@ namespace MatchMaker.UI.Services.ApiClient
             }
         }
 
-        public async Task<MatchDayCompactDTO> CreateNewMatchDay(List<int> participantIds, DateTime when)
+        public async Task<MatchDay> CreateNewMatchDay(List<int> participantIds, DateTime when)
         {
             Guard.NotNullOrEmpty(participantIds, nameof(participantIds));
             Guard.NotInvalidDateTime(when, nameof(when));
 
             if (this.UseMockData)
-                return new MatchDayCompactDTO
+                return new MatchDay
                 {
                     Id = 1,
                     MatchCount = 10,
-                    Participants = new List<Account>(participantIds.Select(f => new Account { Id = f, EmailAddress = f + "lul@lulz.com" })),
+                    Participants = new List<MatchDayParticipant>(participantIds.Select(f => new MatchDayParticipant { Id = f, Account = new Account { Id = f, EmailAddress = f + "lul@lulz.com" }})),
                     When = DateTime.Now
                 };
 
@@ -106,7 +106,7 @@ namespace MatchMaker.UI.Services.ApiClient
                     throw new System.Exception();
                 case HttpStatusCode.Created:
                     var contentJson = await response.Content.ReadAsStringAsync();
-                    var content = JsonConvert.DeserializeObject<MatchDayCompactDTO>(contentJson);
+                    var content = JsonConvert.DeserializeObject<MatchDay>(contentJson);
                     return content;
                 default:
                     throw new System.Exception(response.StatusCode.ToString());
@@ -115,18 +115,17 @@ namespace MatchMaker.UI.Services.ApiClient
 
         public async Task<Match> GetNextMatch(int matchDayId)
         {
-            Guard.NotLessOrEqual(matchDayId, 0, nameof(matchDayId));
+            Guard.NotZeroOrNegative(matchDayId, nameof(matchDayId));
 
             if (this.UseMockData)
                 return new Match
                 {
                     MatchDayId = matchDayId,
                     Id = 1,
-                    CreatedBy = new Account { Id = 1, EmailAddress = "lel@lel.com"},
-                    Participant1 = new Account { Id = 2, EmailAddress = "rofl@lel.com" },
-                    Participant2 = new Account { Id = 3, EmailAddress = "lulz@lel.com" },
+                    CreatedBy = new MatchDayParticipant { Id = 1, Account = new Account { Id = 1, EmailAddress = "lel@lel.com" }},
+                    Participant1 = new MatchDayParticipant { Id = 2, Account = new Account { Id = 2, EmailAddress = "rofl@lel.com" }},
+                    Participant2 = new MatchDayParticipant { Id = 3, Account = new Account { Id = 3, EmailAddress = "lulz@lel.com" }},
                     StartTime = DateTime.Now
-                    
                 };
 
             var json = JsonConvert.SerializeObject(matchDayId);
