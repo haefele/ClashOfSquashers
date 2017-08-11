@@ -2,6 +2,8 @@ using System;
 using System.Data;
 using System.Data.SqlClient;
 using System.Diagnostics;
+using System.Reflection;
+using DbUp;
 using MatchMaker.Api.AppSettings;
 using MatchMaker.Api.Databases;
 using MatchMaker.Api.Databases.Repositories.Accounts;
@@ -60,6 +62,24 @@ namespace MatchMaker.Api.Setup
                 if (error == false)
                     context.RequestServices.GetService<IDatabaseSession>().Commit();
             });
+        }
+
+        public static void MigrateDatabase(this IApplicationBuilder self)
+        {
+            var settings = self.ApplicationServices.GetService<IOptions<DatabaseSettings>>();
+
+            var upgrader = DeployChanges.To
+                .SqlDatabase(settings.Value.ConnectionString)
+                .WithScriptsEmbeddedInAssembly(typeof(Database).GetTypeInfo().Assembly, f => f.StartsWith("MatchMaker.Api.Databases.Scripts"))
+                .WithTransactionPerScript()
+                .JournalToSqlTable("dbo", "DatabaseScripts")
+                .Build();
+
+            var upgradeResult = upgrader.PerformUpgrade();
+            if (upgradeResult.Successful == false)
+            {
+                throw new Exception($"Database migration failed.", upgradeResult.Error);
+            }
         }
     }
 }

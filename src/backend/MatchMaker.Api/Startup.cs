@@ -34,7 +34,9 @@ namespace MatchMaker.Api
         {
             loggerFactory.AddConsole(this.Configuration.GetSection("Logging"));
             loggerFactory.AddDebug();
-            
+
+            app.MigrateDatabase();
+
             app.UseAuthentication();
             app.UseAutoCommit();
             app.UseMvc();
