@@ -22,6 +22,12 @@ namespace MatchMaker.Api.Databases.Repositories.Matches
             return await this.GetMatchesAsync(matchIds, token);
         }
 
+        public Task<Match> CreateMatchAsync(Match match, CancellationToken token)
+        {
+
+            throw new System.NotImplementedException();
+        }
+
         #region SQL
         private async Task<List<int>> GetMatchIdsAsync(int matchDayId, CancellationToken token)
         {
@@ -98,6 +104,17 @@ WHERE M.Id IN (@MatchIds);";
 
                 return matches;
             }
+        }
+
+        private Task<int> InsertMatchAsync(Match match, CancellationToken token)
+        {
+            const string sql = @"
+INSERT INTO dbo.Matches (MatchDayId, Number, CreatedByAccountId, Participant1AccountId, Participant2AccountId, StartTime)
+VALUES (@MatchDayId, (SELECT COUNT(*) + 1 FROM dbo.Matches MM WHERE MM.MatchDayId = @MatchDayId), @CreatedByAccountId, @Participant1AccountId, @Participant2AccountId, @StartTime);
+
+SELECT SCOPE_IDENTITY();";
+
+            return this.Connection.ExecuteScalarAsync<int>(this.AsCommand(sql, new { MatchDayId = match.MatchDayId, CreatedByAccountId = match.CreatedBy.Id }, token));
         }
         #endregion
     }
