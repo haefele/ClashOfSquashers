@@ -21,7 +21,10 @@ namespace MatchMaker.UI.Services.Navigation
 
         public void NavigateToShell()
         {
-            Application.Current.MainPage = this.ShellNavigationService.Shell ?? new ShellView();
+            if (this.ShellNavigationService.Shell == null)
+                this.ShellNavigationService.RegisterShell(new ShellView());
+
+            Application.Current.MainPage = this.ShellNavigationService.Shell;
         }
 
         public void NavigateToNewMatchDay()

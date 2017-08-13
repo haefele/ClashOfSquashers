@@ -15,8 +15,6 @@ namespace MatchMaker.UI.Views.Shell
         public ShellView()
         {
             this.InitializeComponent();
-
-            DependencyService.Get<IShellNavigationService>().RegisterShell(this);
         }
     }
 }
