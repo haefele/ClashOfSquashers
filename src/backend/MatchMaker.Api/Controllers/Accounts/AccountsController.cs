@@ -5,6 +5,7 @@ using MatchMaker.Api.Services.Jwt;
 using MatchMaker.Api.Services.PasswordHasher;
 using MatchMaker.Shared.Accounts;
 using MatchMaker.Shared.Common;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace MatchMaker.Api.Controllers.Accounts
@@ -25,6 +26,33 @@ namespace MatchMaker.Api.Controllers.Accounts
             this._databaseSession = databaseSession;
             this._jwtService = jwtService;
             this._passwordHasher = passwordHasher;
+        }
+
+        [Authorize]
+        [HttpGet]
+        [Route("{accountId:int}")]
+        public async Task<IActionResult> GetById(int accountId, CancellationToken token)
+        {
+            if (accountId <= 0)
+                return this.BadRequest();
+
+            var account = await this._databaseSession.AccountRepository.GetAccountByIdAsync(accountId, token);
+
+            if (account == null)
+                return this.NotFound();
+
+            return this.Ok(account);
+        }
+
+        [Authorize]
+        [HttpGet]
+        public async Task<IActionResult> Search([FromQuery]string searchText, CancellationToken token)
+        {
+            if (string.IsNullOrWhiteSpace(searchText))
+                return this.BadRequest();
+
+            var accounts = await this._databaseSession.AccountRepository.SearchAccountsAsync(searchText, token);
+            return this.Ok(accounts);
         }
 
         [HttpPost]

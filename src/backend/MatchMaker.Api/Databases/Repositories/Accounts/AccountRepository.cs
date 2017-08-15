@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Threading;
@@ -56,6 +57,20 @@ namespace MatchMaker.Api.Databases.Repositories.Accounts
             return (new Account {Id = found.Id, EmailAddress = found.EmailAddress}, found.PasswordHash);
         }
 
+        public Task<Account> GetAccountByIdAsync(int accountId, CancellationToken token)
+        {
+            Guard.NotZeroOrNegative(accountId, nameof(accountId));
+
+            return this.GetAccountByIdAsyncInternal(accountId, token);
+        }
+
+        public Task<List<Account>> SearchAccountsAsync(string searchText, CancellationToken token)
+        {
+            Guard.NotNullOrWhiteSpace(searchText, nameof(searchText));
+
+            return this.GetAccountsBySearchTextAsync(searchText, token);
+        }
+
         #region SQL
         private Task<bool> EmailExistsAsync(string emailAddress, CancellationToken token)
         {
@@ -93,6 +108,30 @@ FROM dbo.Accounts A
 WHERE A.EmailAddress = @EmailAddress";
 
             return (await this.Connection.QueryAsync<AccountWithPasswordHash>(this.AsCommand(sql, new {EmailAddress = emailAddress}, token))).FirstOrDefault();
+        }
+
+        private async Task<Account> GetAccountByIdAsyncInternal(int accountId, CancellationToken token)
+        {
+            Guard.NotZeroOrNegative(accountId, nameof(accountId));
+
+            const string sql = @"
+SELECT A.Id, A.EmailAddress
+FROM dbo.Accounts A
+WHERE A.Id = @AccountId";
+
+            return (await this.Connection.QueryAsync<Account>(this.AsCommand(sql, new {AccountId = accountId}, token))).FirstOrDefault();
+        }
+
+        private async Task<List<Account>> GetAccountsBySearchTextAsync(string searchText, CancellationToken token)
+        {
+            Guard.NotNullOrWhiteSpace(searchText, nameof(searchText));
+
+            const string sql = @"
+SELECT A.Id, A.EmailAddress
+FROM dbo.Accounts A
+WHERE A.EmailAddress LIKE @SearchText";
+
+            return (await this.Connection.QueryAsync<Account>(this.AsCommand(sql, new {SearchText = $"%{searchText}%"},token))).ToList();
         }
 
         private class AccountWithPasswordHash
