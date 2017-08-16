@@ -15,8 +15,6 @@ namespace MatchMaker.UI.Services.Authentication
             this.ApiClient = DependencyService.Get<IApiClientService>();;
         }
 
-        private string _token;
-
         public async Task Register(string email, string password)
         {
             Guard.NotNullOrWhiteSpace(email, nameof(email));
@@ -30,7 +28,7 @@ namespace MatchMaker.UI.Services.Authentication
             Guard.NotNullOrWhiteSpace(email, nameof(email));
             Guard.NotNullOrWhiteSpace(password, nameof(password));
 
-            this._token = await this.ApiClient.Login(email, password);
+            await this.ApiClient.Login(email, password);
         }
     }
 }

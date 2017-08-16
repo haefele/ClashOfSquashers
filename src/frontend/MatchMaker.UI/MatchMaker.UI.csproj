@@ -20,7 +20,6 @@
   </ItemGroup>
   
   <ItemGroup>
-    <Folder Include="Converter\" />
     <Folder Include="Properties\" />
   </ItemGroup>
   

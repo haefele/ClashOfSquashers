@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using MatchMaker.UI.Services.Accounts;
+using MatchMaker.UI.Services.Exception;
 using MatchMaker.UI.Services.MatchDays;
 using MatchMaker.UI.Services.Navigation;
 using Xamarin.Forms;
@@ -20,7 +22,9 @@ namespace MatchMaker.UI.Views.MatchDay.MatchDayConfigurator
 			this.InitializeComponent();
             this.BindingContext = new MatchDayConfiguratorViewModel(
                 DependencyService.Get<INavigationService>(), 
-                DependencyService.Get<IMatchDaysService>());
+                DependencyService.Get<IMatchDaysService>(),
+                DependencyService.Get<IExceptionHandler>(),
+                DependencyService.Get<IAccountService>());
 		}
     }
 }

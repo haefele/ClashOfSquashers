@@ -34,7 +34,7 @@ namespace MatchMaker.UI.Views.MatchDay
             set
             {
                 this.SetProperty(ref this._matchDay, value); 
-                this.NextMatchCommand.OnCanExecuteChagend();
+                this.NextMatchCommand.OnCanExecuteChanged();
             }
         }
 

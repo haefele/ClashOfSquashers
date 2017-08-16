@@ -8,6 +8,7 @@
         <Image Source="testlogo.jpg"
                HorizontalOptions="Center"
                WidthRequest="400"/>
+        <ActivityIndicator IsVisible="{Binding IsLoading}"/>
         <Entry Placeholder="User"
                Text="{Binding EMail}"
                Keyboard="Email" />

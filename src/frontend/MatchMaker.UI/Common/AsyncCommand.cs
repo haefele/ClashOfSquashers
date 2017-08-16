@@ -43,7 +43,7 @@ namespace MatchMaker.UI.Common
             if (Interlocked.CompareExchange(ref this._callRunning, 1, 0) == 1)
                 return;
 
-            this.OnCanExecuteChagend();
+            this.OnCanExecuteChanged();
 
             this._func(parameter).ContinueWith((task, _) => this.ExecuteFinished(task), null, TaskContinuationOptions.ExecuteSynchronously);
         }
@@ -57,10 +57,10 @@ namespace MatchMaker.UI.Common
                 this.ExceptionHandler.Handle(task.Exception);
             }
 
-            this.OnCanExecuteChagend();
+            this.OnCanExecuteChanged();
         }
 
-        public void OnCanExecuteChagend()
+        public void OnCanExecuteChanged()
         {
             var handler = this.CanExecuteChanged;
 

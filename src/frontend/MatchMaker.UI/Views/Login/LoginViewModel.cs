@@ -30,6 +30,14 @@ namespace MatchMaker.UI.Views.Login
             set { this.SetProperty(ref this._password, value); }
         }
 
+        private bool _isLoading;
+
+        public bool IsLoading
+        {
+            get { return this._isLoading; }
+            set { this.SetProperty(ref this._isLoading, value); }
+        }
+
         public Command LoginCommand { get; }
         public Command RegisterCommand { get; }
 
@@ -44,25 +52,34 @@ namespace MatchMaker.UI.Views.Login
 
             this.EMail = "1@1.de";
             this.Password = "123456";
+
+            this.IsLoading = false;
         }
 
         private async Task Register()
         {
-            try
-            {
-                await this._authService.Register(this.EMail, this.Password);
-            }
-            catch (EmailAlreadyInUseException)
-            {
-                await this._alertService.DisplayAlert("Invalid Sign-Up", "This email-address is already in use.");
-            }
+
+                try
+                {
+                    await this._authService.Register(this.EMail, this.Password);
+                    await this.Login();
+                }
+                catch (EmailAlreadyInUseException)
+                {
+                    await this._alertService.DisplayAlert("Invalid Sign-Up", "This email-address is already in use.");
+                }
+
         }
 
         private async Task Login()
         {
             try
             {
+                this.IsLoading = true;
+
                 await this._authService.Login(this.EMail, this.Password);
+
+                this.IsLoading = false;
             }
             catch (InvalidPasswordException)
             {

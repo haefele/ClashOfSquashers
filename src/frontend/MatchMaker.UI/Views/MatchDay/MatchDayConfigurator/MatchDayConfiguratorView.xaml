@@ -7,8 +7,20 @@
             <RowDefinition  Height="*"/>
             <RowDefinition  Height="Auto"/>
         </Grid.RowDefinitions>
-        <Label Text="config options"
-               Grid.Row="0"/>
+        <StackLayout Grid.Row="0"
+                     Padding="10">
+            <Label Text="Participants:"/>
+            <SearchBar Placeholder=""
+                       SearchCommand="{Binding SearchCommand}"/>
+            <ListView ItemsSource="{Binding FoundAccounts}"
+                      SelectedItem="{Binding SelectedFoundAccount}">
+               <ListView.ItemTemplate>
+                   <DataTemplate>
+                        <TextCell Text="{Binding EmailAddress}"/>
+                   </DataTemplate>
+               </ListView.ItemTemplate>
+            </ListView>
+        </StackLayout>
         <StackLayout Grid.Row="1"
                      Padding="10">
             <Button Text="Create matchday"
